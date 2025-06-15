@@ -16,14 +16,17 @@ const useUser = () => {
 
   const Dispatch = useDispatch();
   const navigate = useNavigate();
-  const baseUrl = "http://localhost:3000";
+  const baseUrl = import.meta.env.VITE_API_URL;
 
   const handleVerifyCode = async (code: string): Promise<boolean> => {
     try {
       setLoading(true);
-      const response = await ApiInstance.post(`${baseUrl}/api/auth/verify-code`, {
-        code: code,
-      });
+      const response = await ApiInstance.post(
+        `${baseUrl}/api/auth/verify-code`,
+        {
+          code: code,
+        }
+      );
       if (response.status === 200 || response.status === 201) {
         return true;
       } else {
@@ -58,15 +61,17 @@ const useUser = () => {
 
   const handleRegister = async (dataUser: ICreateUser): Promise<boolean> => {
     try {
-      const { data } = await axios.post(`${baseUrl}/api/auth/register`, dataUser);
+      const { data } = await axios.post(
+        `${baseUrl}/api/auth/register`,
+        dataUser
+      );
       if (data.ok) {
         navigate("/login");
         return true;
-      } else {        
+      } else {
         return false;
       }
-      
-    } catch (error : any) {      
+    } catch (error: any) {
       toast.error(error.response.data.message);
       return false;
     }
@@ -80,7 +85,7 @@ const useUser = () => {
         Dispatch(onLoadUser(data.access_token));
         navigate("/dashbooard");
       }
-    } catch (error : any) {
+    } catch (error: any) {
       toast.error(error.response.data.message);
     }
   };
@@ -95,8 +100,8 @@ const useUser = () => {
         Dispatch(onLoadUserInfo(data.user));
       }
     } catch (error: any) {
-        localStorage.removeItem("token");
-        navigate("/login");
+      localStorage.removeItem("token");
+      navigate("/login");
     }
   };
 

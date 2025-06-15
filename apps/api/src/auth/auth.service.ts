@@ -30,66 +30,57 @@ export class AuthService {
     phone_country_code: number,
     company_name: string,
   ) {
-    try {
-      const hashedPassword = await bcrypt.hash(password, 10);
+    const hashedPassword = await bcrypt.hash(password, 10);
 
-      if (!phone || !phone_country_code) {
-        throw new BadRequestException('Invalid phone or country code');
-      }
+    if (!phone || !phone_country_code) {
+      throw new BadRequestException('Invalid phone or country code');
+    }
 
-      const usreExists = await this.userRepository.findOne({
-        where: { email: email },
-      });
-      if (usreExists?.id) {
-        throw new BadRequestException('Email already use');
-      }
+    const userExists = await this.userRepository.findOne({
+      where: { email: email },
+    });
+    if (userExists?.id) {
+      throw new BadRequestException('Email already use');
+    }
 
-      const phoneFinal = phone_country_code.toString() + phone.toString();
-      const user = this.userRepository.create({
-        firstName,
-        lastName,
-        email,
-        password: hashedPassword,
-        isActive: false,
-        phoneWithCountry: phoneFinal,
-        company_name: company_name,
-      });
+    const phoneFinal = phone_country_code.toString() + phone.toString();
+    const user = this.userRepository.create({
+      firstName,
+      lastName,
+      email,
+      password: hashedPassword,
+      isActive: false,
+      phoneWithCountry: phoneFinal,
+      company_name: company_name,
+    });
 
-      const existNumberInTwilio = await this.twilioService.existNumberInTwilio(
-        user.phoneWithCountry,
-      );
+    const existNumberInTwilio = await this.twilioService.existNumberInTwilio(
+      user.phoneWithCountry,
+    );
 
-      const webhookUrl = process.env.DOMAIN;
-      await this.twilioService.setWebhooksForNumber(phoneFinal, {
-        incomingCallWebhook: `${webhookUrl}/twilio/incomingCalls`,
-        callStatusWebhook: `${webhookUrl}/twilio/finishCalls`,
-      });
+    const webhookUrl = process.env.DOMAIN;
+    await this.twilioService.setWebhooksForNumber(phoneFinal, {
+      incomingCallWebhook: `${webhookUrl}/twilio/incomingCalls`,
+      callStatusWebhook: `${webhookUrl}/twilio/finishCalls`,
+    });
 
-      if (existNumberInTwilio) {
-        await this.userRepository.save(user);
-      } else {
-        throw new BadRequestException('The number does not exist in twilio');
-      }
-      const res = await this.emailService.sendVerificationEmail(
-        user.email,
-        user.id,
-      );
+    if (existNumberInTwilio) {
+      await this.userRepository.save(user);
+    } else {
+      throw new BadRequestException('The number does not exist in twilio');
+    }
+    const res = await this.emailService.sendVerificationEmail(
+      user.email,
+      user.id,
+    );
 
-      if (res.success) {
-        return {
-          message: 'We have sent an email to verify your account.',
-          ok: true,
-        };
-      } else {
-        return { message: res.error, ok: false };
-      }
-    } catch (error) {
-      throw new BadRequestException({
-        ok: false,
-        statusCode: 400,
-        message: error?.message || 'error register user',
-        error: 'Bad Request',
-      });
+    if (res.success) {
+      return {
+        message: 'We have sent an email to verify your account.',
+        ok: true,
+      };
+    } else {
+      return { message: res.error, ok: false };
     }
   }
 
@@ -98,19 +89,19 @@ export class AuthService {
       throw new BadRequestException('Invalid phone or country code');
     }
 
-    const usreExists = await this.userRepository.findOne({
+    const userExists = await this.userRepository.findOne({
       where: { id: userId },
     });
-    if (!usreExists) {
+    if (!userExists) {
       throw new BadRequestException('Email already use');
     }
     const userValid = await this.twilioService.verifyCode(
-      `+${usreExists.phoneWithCountry}`,
+      `+${userExists.phoneWithCountry}`,
       code,
     );
     if (userValid) {
-      usreExists.phoneValidated = true;
-      this.userRepository.save(usreExists);
+      userExists.phoneValidated = true;
+      await this.userRepository.save(userExists);
       return { message: 'Phone validated' };
     } else {
       throw new BadRequestException('Invalid phone code');
@@ -122,14 +113,14 @@ export class AuthService {
       throw new BadRequestException('Invalid phone or country code');
     }
 
-    const usreExists = await this.userRepository.findOne({
+    const userExists = await this.userRepository.findOne({
       where: { id: userId },
     });
-    if (!usreExists) {
+    if (!userExists) {
       throw new BadRequestException('Email already use');
     }
     await this.twilioService.sendVerificationCode(
-      `+${usreExists.phoneWithCountry}`,
+      `+${userExists.phoneWithCountry}`,
     );
     return { message: 'Code sended!' };
   }
@@ -192,27 +183,18 @@ export class AuthService {
   }
 
   async requestNumber(data: RequestNumberDTO) {
-    try {
-      const resp = await this.emailService.sendRequestNumber(data);
+    const resp = await this.emailService.sendRequestNumber(data);
 
-      if (resp.ok === true) {
-        return {
-          ok: true,
-          message: 'Email sent successfully!',
-        };
-      } else {
-        return {
-          ok: false,
-          message: 'An error occurred while sending the email',
-        };
-      }
-    } catch (error) {
-      throw new BadRequestException({
+    if (resp.ok === true) {
+      return {
+        ok: true,
+        message: 'Email sent successfully!',
+      };
+    } else {
+      return {
         ok: false,
-        statusCode: 400,
-        message: error?.message || 'error sending email',
-        error: 'Bad Request',
-      });
+        message: 'An error occurred while sending the email',
+      };
     }
   }
 }

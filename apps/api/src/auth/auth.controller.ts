@@ -8,7 +8,7 @@ import {
   Query,
   Res,
 } from '@nestjs/common';
-import { Response } from 'express';
+import { Request, Response } from 'express';
 import * as jwt from 'jsonwebtoken';
 import { AuthService } from './auth.service';
 import { JwtAuthGuard } from './jwt-auth.guard';
@@ -46,20 +46,20 @@ export class AuthController {
   @UseGuards(JwtAuthGuard)
   @Post('verify-code')
   async verifyCode(@Body() body: { code: string }, @Req() req: Request) {
-    console.log('Código recibido:', body.code, 'Usuario ID:', req.user.id);
-    return this.authService.verifyAccount(body.code, req?.user?.id ?? '');
+    console.log('Código recibido:', body.code, 'Usuario ID:', req.user?.id);
+    return this.authService.verifyAccount(body.code, Number(req.user?.id));
   }
 
   @UseGuards(JwtAuthGuard)
   @Post('send-verify-code')
-  async sendVerifyCode(@Request() req) {
-    return this.authService.sendVerifyCode(req?.user?.id ?? '');
+  async sendVerifyCode(@Req() req: Request) {
+    return this.authService.sendVerifyCode(Number(req.user?.id));
   }
 
   @UseGuards(JwtAuthGuard)
   @Get('profile')
-  getProfile(@Request() req) {
-    return this.authService.getProfile(req.user.id);
+  getProfile(@Req() req: Request) {
+    return this.authService.getProfile(Number(req.user?.id));
   }
 
   @Get('verify')
@@ -79,7 +79,7 @@ export class AuthController {
         decoded !== null &&
         'userId' in decoded
       ) {
-        const userId = (decoded as { userId: string }).userId;
+        const userId = (decoded as { userId: number }).userId;
 
         await this.authService.verifyUser(userId);
 

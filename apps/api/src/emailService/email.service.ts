@@ -1,4 +1,4 @@
-import { BadRequestException, Injectable } from '@nestjs/common';
+import { Injectable, InternalServerErrorException } from '@nestjs/common';
 import { Resend } from 'resend';
 import * as jwt from 'jsonwebtoken';
 import { RequestNumberDTO } from 'src/auth/dto/request-number.dto';
@@ -8,7 +8,6 @@ export class EmailService {
   private readonly resend: Resend;
 
   constructor() {
-    console.log('EMAIL_SERVICE_API_KEY:', process.env.EMAIL_SERVICE_API_KEY); // 📌 Depuración
     this.resend = new Resend(process.env.EMAIL_SERVICE_API_KEY);
   }
 
@@ -57,7 +56,7 @@ export class EmailService {
       return { success: true, data };
     } catch (err) {
       console.error('Error inesperado:', err);
-      return { success: false, error: err };
+      return { success: false, error: 'Failed to send email' };
     }
   }
 
@@ -96,11 +95,12 @@ export class EmailService {
       console.log('Email sent successfully:', data);
       return { ok: true, data };
     } catch (error) {
-      throw new BadRequestException({
+      console.error('Unexpected error sending email:', error);
+      throw new InternalServerErrorException({
         ok: false,
-        statusCode: 400,
-        message: error?.message || 'Error sending email',
-        error: 'Bad Request',
+        statusCode: 500,
+        message: 'Failed to send email',
+        error: 'Internal Server Error',
       });
     }
   }

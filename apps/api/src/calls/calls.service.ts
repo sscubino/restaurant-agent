@@ -32,7 +32,7 @@ export class CallsService {
         throw new BadRequestException('Error, user "to" does not exist');
       }
 
-      const newCall = await this.callsRepository.create({
+      const newCall = this.callsRepository.create({
         accountSid: data.accountSid,
         callSid: data.callSid,
         callStatus: data.callStatus,
@@ -47,17 +47,17 @@ export class CallsService {
       });
 
       await this.callsRepository.save(newCall);
-      console.log('devolvere');
 
       return {
         ok: true,
         message: 'Call created successfully',
       };
     } catch (error) {
+      console.error('Error creating call:', error);
       throw new BadRequestException({
         ok: false,
         statusCode: 400,
-        message: error?.message || 'error creating call',
+        message: 'error creating call',
         error: 'Bad Request',
       });
     }
@@ -84,10 +84,11 @@ export class CallsService {
         totalItems: totalItems,
       };
     } catch (error) {
+      console.error('Error getting all calls:', error);
       throw new BadRequestException({
         ok: false,
         statusCode: 400,
-        message: error?.message || 'error get all calls',
+        message: 'error get all calls',
         error: 'Bad Request',
       });
     }

@@ -1,6 +1,5 @@
 import { Injectable } from '@nestjs/common';
 import axios from 'axios';
-import { OpenAIService } from 'src/openai/openai.service';
 import * as twilio from 'twilio';
 
 @Injectable()

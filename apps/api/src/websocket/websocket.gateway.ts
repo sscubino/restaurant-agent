@@ -7,7 +7,7 @@ import {
 } from '@nestjs/websockets';
 import { OpenAIService } from 'src/openai/openai.service';
 import { Twilio } from 'twilio';
-import { WebSocket } from 'ws';
+import { RawData, WebSocket } from 'ws';
 import { instructions } from './instructions';
 import { OrderService } from 'src/order/order.service';
 
@@ -172,7 +172,7 @@ export class MediaStreamGateway
       });
 
       try {
-        openAiWs.on('message', async (data: WebSocket.Data) => {
+        openAiWs.on('message', async (data: RawData) => {
           const messageStr = typeof data === 'string' ? data : data.toString();
           try {
             const parsedMessage = JSON.parse(messageStr);
