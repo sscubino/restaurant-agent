@@ -1,6 +1,5 @@
 import * as React from "react";
 import Input from "../../components/InputField";
-import ReactCountryDropdown from "react-country-dropdown";
 import { useNavigate } from "react-router-dom";
 import useUser from "../../hooks/useUser";
 import { ICreateUser } from "../../hooks/types";
@@ -14,7 +13,7 @@ const initialState = {
   password: "",
   phone: null,
   Available_code: null,
-  company_name: ''
+  company_name: "",
 };
 
 const RegisterModule = () => {
@@ -64,7 +63,7 @@ const RegisterModule = () => {
       if (Object.keys(errors).length === 0) {
         const isCreated = await handleRegister(data);
         if (isCreated) {
-          toast.success('Account created successfully!')
+          toast.success("Account created successfully!");
         } else {
           console.error("Error creating account");
         }
@@ -145,15 +144,6 @@ const RegisterModule = () => {
           </label>
 
           <div className="w-full flex flex-row items-center gap-4">
-            <ReactCountryDropdown
-              defaultCountry="JP"
-              onSelect={(country) =>
-                handleSetData(
-                  "phone_country_code",
-                  parseInt(country.callingCodes[0])
-                )
-              }
-            />
             <Input
               type="number"
               onChange={(value) => handleSetData("phone", parseInt(value))}
@@ -202,7 +192,6 @@ const RegisterModule = () => {
             className="ml-2 cursor-pointer text-gray-900 no-underline font-bold outline-none focus:ring-0 focus:outline-none"
           >
             Request one
-
           </span>
         </span>
 
