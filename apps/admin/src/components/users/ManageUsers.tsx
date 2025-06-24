@@ -1,95 +1,86 @@
-import { useState } from "react";
+import { useEffect, useState } from "react";
+import { toast } from "sonner";
 
 import DeleteUserAlertDialog from "@/components/users/DeleteUserAlertDialog";
 import UserDialog, { type UserFormData } from "@/components/users/UserDialog";
+import { register } from "@/services/api/register";
+import type { User } from "@/services/api/users";
+import { deleteUser, getUsers } from "@/services/api/users";
 
 import { UserTable } from "./UserTable";
 
-export interface User {
-  id: string;
-  firstName: string;
-  lastName: string;
-  email: string;
-  companyName: string;
-  phone: string;
-  creationDate: string;
-}
-
-const initialUsers: User[] = [];
-
 export default function ManageUsers() {
-  const [users, setUsers] = useState<User[]>(initialUsers);
+  const [users, setUsers] = useState<User[]>([]);
+  const [isLoading, setIsLoading] = useState(true);
   const [isUserDialogOpen, setIsUserDialogOpen] = useState(false);
   const [isDeleteDialogOpen, setIsDeleteDialogOpen] = useState(false);
-  const [dialogMode, setDialogMode] = useState<"create" | "update">("create");
-  const [editingUser, setEditingUser] = useState<User | null>(null);
+  const [deletingUser, setDeletingUser] = useState<User | null>(null);
 
-  const handleCreateUser = (user: UserFormData) => {
-    const newUser: User = {
-      id: Date.now().toString(),
-      creationDate: new Date().toISOString(),
-      ...user,
-    };
-    setUsers([...users, newUser]);
-  };
+  useEffect(() => {
+    loadUsers();
+  }, []);
 
-  const handleUpdateUser = (updatedUser: User) => {
-    if (editingUser) {
-      setUsers(
-        users.map((user) =>
-          user.id === editingUser.id ? { ...editingUser, ...updatedUser } : user
-        )
-      );
-      setEditingUser(null);
+  const loadUsers = async () => {
+    try {
+      setIsLoading(true);
+      const fetchedUsers = await getUsers();
+      setUsers(fetchedUsers);
+    } catch (error) {
+      console.error("Error loading users:", error);
+    } finally {
+      setIsLoading(false);
     }
   };
 
-  const handleDeleteUser = (userId: string) => {
-    setUsers(users.filter((user) => user.id !== userId));
+  const handleCreateUser = async (userData: UserFormData) => {
+    try {
+      await register(userData);
+      toast.success("User created successfully");
+      loadUsers();
+    } catch (error) {
+      toast.error("Failed to create user");
+      console.error("Error creating user:", error);
+    }
+  };
+
+  const handleDeleteUser = async (userId: string) => {
+    try {
+      await deleteUser(userId);
+      setUsers(users.filter((user) => user.id !== userId));
+      toast.success("User deleted successfully");
+    } catch (error) {
+      toast.error("Failed to delete user");
+      console.error("Error deleting user:", error);
+    }
   };
 
   const handleOpenCreateDialog = () => {
-    setDialogMode("create");
-    setEditingUser(null);
     setIsUserDialogOpen(true);
-  };
-
-  const handleOpenEditUserDialog = (user: User) => {
-    setDialogMode("update");
-    setEditingUser(user);
-    setIsUserDialogOpen(true);
-  };
-
-  const handleUserDialogSubmit = (data: UserFormData | User) => {
-    if (dialogMode === "create") {
-      handleCreateUser(data as UserFormData);
-    } else {
-      handleUpdateUser(data as User);
-    }
   };
 
   const handleOpenDeleteDialog = (userId: string) => {
     setIsDeleteDialogOpen(true);
-    setEditingUser(users.find((user) => user.id === userId)!);
+    setDeletingUser(users.find((user) => user.id === userId)!);
   };
+
+  if (isLoading) {
+    return <div>Loading users...</div>;
+  }
 
   return (
     <>
       <UserTable
         users={users}
-        handleEditUser={handleOpenEditUserDialog}
         handleDeleteUser={handleOpenDeleteDialog}
         handleCreateUser={handleOpenCreateDialog}
       />
       <UserDialog
-        mode={dialogMode}
-        user={editingUser || undefined}
         isOpen={isUserDialogOpen}
         setIsOpen={setIsUserDialogOpen}
-        handleSubmit={handleUserDialogSubmit}
+        handleSubmit={handleCreateUser}
       />
       <DeleteUserAlertDialog
-        user={editingUser!}
+        user={deletingUser!}
         isOpen={isDeleteDialogOpen}
         setIsOpen={setIsDeleteDialogOpen}
         handleDeleteUser={handleDeleteUser}

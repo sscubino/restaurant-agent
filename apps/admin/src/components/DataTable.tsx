@@ -162,7 +162,6 @@ const TablePagination = ({
   onPageChange,
 }: TablePaginationProps) => {
   const startIndex = (currentPage - 1) * itemsPerPage;
-  console.log(currentPage, totalPages, totalItems, itemsPerPage);
 
   const getVisiblePages = () => {
     const pages = [];

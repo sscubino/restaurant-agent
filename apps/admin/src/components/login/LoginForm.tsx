@@ -16,7 +16,7 @@ import { Input } from "@/components/ui/input";
 import { RoutePaths } from "@/config/types";
 import { useAuth } from "@/contexts/AuthContext";
 import { getAxiosErrorMessage } from "@/lib/utils";
-import { login } from "@/services/api/auth";
+import { login } from "@/services/api/login";
 
 const loginSchema = z.object({
   email: z

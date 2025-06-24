@@ -1,4 +1,5 @@
 import { useState } from "react";
+import { Toaster } from "sonner";
 
 import { SiteHeader } from "@/components/Header";
 import { DashboardSidebar } from "@/components/Sidebar";
@@ -52,6 +53,7 @@ export default function DashboardLayout({
           </AlertDialogFooter>
         </AlertDialogContent>
       </AlertDialog>
+      <Toaster />
     </SidebarProvider>
   );
 }

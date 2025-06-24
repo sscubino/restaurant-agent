@@ -8,7 +8,7 @@ import {
   AlertDialogHeader,
   AlertDialogTitle,
 } from "@/components/ui/alert-dialog";
-import type { User } from "@/components/users/ManageUsers";
+import type { User } from "@/services/api/users";
 
 interface DeleteUserAlertDialogProps {
   isOpen: boolean;

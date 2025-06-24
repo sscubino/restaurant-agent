@@ -2,7 +2,6 @@ import { HomeIcon, LayoutDashboard, LogOut } from "lucide-react";
 import { UsersIcon } from "lucide-react";
 import { Link, useLocation } from "react-router";
 
-import { Button } from "@/components/ui/button";
 import {
   Sidebar,
   SidebarContent,
@@ -59,7 +58,7 @@ export function DashboardSidebar({ handleLogout }: SidebarProps) {
           </SidebarMenuItem>
         </SidebarMenu>
       </SidebarHeader>
-      <SidebarContent>
+      <SidebarContent className="overflow-hidden">
         <SidebarGroup>
           <SidebarGroupLabel>Application</SidebarGroupLabel>
           <SidebarGroupContent>
@@ -86,19 +85,14 @@ export function DashboardSidebar({ handleLogout }: SidebarProps) {
         </SidebarGroup>
       </SidebarContent>
       <SidebarFooter>
-        <SidebarMenu>
+        <SidebarMenu className="mt-auto">
           <SidebarMenuItem>
-            <SidebarMenuButton asChild>
-              <Button
-                variant="ghost"
-                className="w-full justify-start"
-                size="lg"
-                type="button"
-                onClick={handleLogout}
-              >
-                <LogOut className="size-5" />
-                Logout
-              </Button>
+            <SidebarMenuButton
+              onClick={handleLogout}
+              className="hover:text-destructive"
+            >
+              <LogOut className="size-5" />
+              Logout
             </SidebarMenuButton>
           </SidebarMenuItem>
         </SidebarMenu>

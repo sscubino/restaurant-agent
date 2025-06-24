@@ -1,5 +1,4 @@
 import { zodResolver } from "@hookform/resolvers/zod";
-import { useEffect } from "react";
 import { useForm } from "react-hook-form";
 import validator from "validator";
 import { z } from "zod";
@@ -22,7 +21,7 @@ import {
   FormMessage,
 } from "@/components/ui/form";
 import { Input } from "@/components/ui/input";
-import type { User } from "@/components/users/ManageUsers";
+import type { User } from "@/services/api/users";
 
 const userSchema = z.object({
   firstName: z.string().min(1, "First name is required"),
@@ -31,8 +30,12 @@ const userSchema = z.object({
     .string()
     .min(1, "Email is required")
     .email("Please enter a valid email address"),
+  password: z
+    .string()
+    .min(1, "Password is required")
+    .min(8, "Password must be at least 8 characters long"),
   companyName: z.string().min(1, "Company name is required"),
-  phone: z
+  companyPhone: z
     .string()
     .min(1, "Phone number is required")
     .refine(validator.isMobilePhone, "Invalid phone number"),
@@ -41,48 +44,28 @@ const userSchema = z.object({
 export type UserFormData = z.infer<typeof userSchema>;
 
 interface UserDialogProps {
-  mode: "create" | "update";
   user?: User;
   isOpen: boolean;
   setIsOpen: (isOpen: boolean) => void;
-  handleSubmit: (data: UserFormData | User) => void;
+  handleSubmit: (data: UserFormData) => void;
 }
 
-const UserDialog = ({
-  mode,
-  user,
-  isOpen,
-  setIsOpen,
-  handleSubmit,
-}: UserDialogProps) => {
+const UserDialog = ({ isOpen, setIsOpen, handleSubmit }: UserDialogProps) => {
   const form = useForm<UserFormData>({
     resolver: zodResolver(userSchema),
     defaultValues: {
       firstName: "",
       lastName: "",
       email: "",
+      password: "",
       companyName: "",
-      phone: "",
+      companyPhone: "",
     },
     mode: "onBlur",
   });
 
-  useEffect(() => {
-    form.reset({
-      firstName: user?.firstName ?? "",
-      lastName: user?.lastName ?? "",
-      email: user?.email ?? "",
-      companyName: user?.companyName ?? "",
-      phone: user?.phone ?? "",
-    });
-  }, [mode, user, form]);
-
   const onSubmit = (data: UserFormData) => {
-    if (mode === "update" && user) {
-      handleSubmit({ ...user, ...data });
-    } else {
-      handleSubmit(data);
-    }
+    handleSubmit(data);
     form.reset();
     setIsOpen(false);
   };
@@ -94,18 +77,10 @@ const UserDialog = ({
     setIsOpen(open);
   };
 
-  const isCreate = mode === "create";
-  const title = isCreate ? "Create New User" : "Edit User";
-  const description = isCreate
-    ? "Add a new user to the system. Fill in all the required information."
-    : "Make changes to the user information. Click save when you're done.";
-  const submitText = form.formState.isSubmitting
-    ? isCreate
-      ? "Creating..."
-      : "Saving..."
-    : isCreate
-      ? "Create"
-      : "Save Changes";
+  const title = "Create New User";
+  const description =
+    "Add a new user to the system. Fill in all the required information.";
+  const submitText = form.formState.isSubmitting ? "Creating..." : "Create";
 
   return (
     <Dialog open={isOpen} onOpenChange={handleDialogOpenChange}>
@@ -117,7 +92,7 @@ const UserDialog = ({
         <Form {...form}>
           <form onSubmit={form.handleSubmit(onSubmit)} className="space-y-4">
             <div className="grid gap-4 py-4">
-              <div className="grid grid-cols-2 gap-4">
+              <div className="grid grid-cols-2 gap-4 items-start">
                 <FormField
                   control={form.control}
                   name="firstName"
@@ -164,6 +139,23 @@ const UserDialog = ({
               />
               <FormField
                 control={form.control}
+                name="password"
+                render={({ field }) => (
+                  <FormItem>
+                    <FormLabel>Password</FormLabel>
+                    <FormControl>
+                      <Input
+                        type="password"
+                        placeholder="Enter password"
+                        {...field}
+                      />
+                    </FormControl>
+                    <FormMessage />
+                  </FormItem>
+                )}
+              />
+              <FormField
+                control={form.control}
                 name="companyName"
                 render={({ field }) => (
                   <FormItem>
@@ -177,7 +169,7 @@ const UserDialog = ({
               />
               <FormField
                 control={form.control}
-                name="phone"
+                name="companyPhone"
                 render={({ field }) => (
                   <FormItem>
                     <FormLabel>Phone Number</FormLabel>
