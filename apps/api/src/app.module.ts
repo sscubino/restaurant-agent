@@ -1,60 +1,41 @@
+import { getDatabaseConfig } from '@config/database.config';
 import { Module } from '@nestjs/common';
-import { AppController } from './app.controller';
-import { AppService } from './app.service';
+import { ConfigModule, ConfigService } from '@nestjs/config';
 import { TypeOrmModule } from '@nestjs/typeorm';
-import { Platillo } from './dish/entities/dish.entities';
-import { User } from './user/entities/user.entity';
-import { UserModule } from './user/user.module';
-import { DishModule } from './dish/dish.module';
-import { ConfigModule } from '@nestjs/config';
-import { AuthModule } from './auth/auth.module';
-import { ChatGptThreads } from './chatGptThreads/entities/chatGpThreads.entity';
-import { TwiloModule } from './twiloService/twilo.module';
-import { TableModule } from './table/table.module';
-import { Table } from './table/entities/table.entity';
-import { WebSocketModule } from './websocket/websocket.module';
-import { TwilioCall } from './calls/entities/calls.entity';
-import { CallsModule } from './calls/calls.module';
-import { OrderModule } from './order/order.module';
-import { ProductOrderModule } from './productOrder/productOrder.module';
-import { Order } from './order/entities/order.entity';
-import { ProductOrder } from './productOrder/entities/ProductOrder.entity';
-import { EmailModule } from './emailService/email.module';
+
+import { AuthModule } from '@/modules/auth/auth.module';
+import { MenusModule } from '@/modules/menus/menus.module';
+import { OrdersModule } from '@/modules/orders/orders.module';
+import { PhoneCallsModule } from '@/modules/phone-calls/phone-calls.module';
+import { RestaurantsModule } from '@/modules/restaurants/restaurants.module';
+import { TablesModule } from '@/modules/tables/tables.module';
+import { TwilioModule } from '@/modules/twilio/twilio.module';
+import { UsersModule } from '@/modules/users/users.module';
+
+import { AdminModule } from './modules/admin/admin.module';
+import { AssistantModule } from './modules/assistant/assistant.module';
 
 @Module({
   imports: [
-    ConfigModule.forRoot({ cache: true }),
-    TypeOrmModule.forRoot({
-      type: 'postgres',
-      host: process.env.DB_HOST,
-      port: Number(process.env.DB_PORT) ?? 5432,
-      username: process.env.POSTGRES_USER,
-      password: process.env.POSTGRES_PASSWORD,
-      database: process.env.POSTGRES_DB,
-      entities: [
-        Platillo,
-        User,
-        Table,
-        ChatGptThreads,
-        TwilioCall,
-        Order,
-        ProductOrder,
-      ],
-      synchronize: true,
+    ConfigModule.forRoot({
+      isGlobal: true,
     }),
-    UserModule,
-    DishModule,
+    TypeOrmModule.forRootAsync({
+      imports: [ConfigModule],
+      useFactory: (configService: ConfigService) =>
+        getDatabaseConfig(configService),
+      inject: [ConfigService],
+    }),
     AuthModule,
-    ChatGptThreads,
-    TwiloModule,
-    TableModule,
-    WebSocketModule,
-    OrderModule,
-    ProductOrderModule,
-    CallsModule,
-    EmailModule,
+    UsersModule,
+    RestaurantsModule,
+    MenusModule,
+    OrdersModule,
+    TablesModule,
+    AssistantModule,
+    PhoneCallsModule,
+    TwilioModule,
+    AdminModule,
   ],
-  controllers: [AppController],
-  providers: [AppService],
 })
 export class AppModule {}

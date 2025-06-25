@@ -8,7 +8,13 @@ export interface LoginResponse {
 }
 
 export const login = async (email: string, password: string) => {
-  const response = await api.post("/api/auth/login", { email, password });
+  const response = await api.post<LoginResponse>("/auth/login", {
+    email,
+    password,
+  });
+  if (!response.data.user.isSuperUser) {
+    throw new Error("Unauthorized");
+  }
   setToken(response.data.access_token);
   return response.data;
 };

@@ -1,5 +1,5 @@
 import { HomeIcon, LayoutDashboard, LogOut } from "lucide-react";
-import { UsersIcon } from "lucide-react";
+import { StoreIcon, UsersIcon } from "lucide-react";
 import { Link, useLocation } from "react-router";
 
 import {
@@ -22,6 +22,11 @@ const items = [
     title: "Dashboard",
     href: RoutePaths.HOME,
     icon: <HomeIcon />,
+  },
+  {
+    title: "Restaurants",
+    href: RoutePaths.RESTAURANTS,
+    icon: <StoreIcon />,
   },
   {
     title: "Users",

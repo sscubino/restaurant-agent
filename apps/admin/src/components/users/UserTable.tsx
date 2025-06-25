@@ -28,17 +28,27 @@ const UserTable = ({
 }: UserTableProps) => {
   const columns: ColumnDef<User>[] = [
     {
-      id: "name",
-      accessorFn: (row) => `${row.firstName} ${row.lastName}`,
+      id: "firstName",
+      accessorKey: "firstName",
       header: ({ column }) => {
-        return <DataTableHeaderWithSorting column={column} header="Name" />;
+        return (
+          <DataTableHeaderWithSorting column={column} header="First Name" />
+        );
       },
       cell: ({ row }) => {
+        return <div>{row.original.firstName}</div>;
+      },
+    },
+    {
+      id: "lastName",
+      accessorKey: "lastName",
+      header: ({ column }) => {
         return (
-          <div>
-            {row.original.firstName} {row.original.lastName}
-          </div>
+          <DataTableHeaderWithSorting column={column} header="Last Name" />
         );
+      },
+      cell: ({ row }) => {
+        return <div>{row.original.lastName}</div>;
       },
     },
     {
@@ -52,28 +62,6 @@ const UserTable = ({
       },
     },
     {
-      id: "restaurant",
-      accessorKey: "restaurant",
-      header: ({ column }) => {
-        return (
-          <DataTableHeaderWithSorting column={column} header="Company Name" />
-        );
-      },
-      cell: ({ row }) => {
-        return <div>{row.original.restaurant?.name ?? "-"}</div>;
-      },
-    },
-    {
-      id: "phone",
-      accessorKey: "phone",
-      header: ({ column }) => {
-        return <DataTableHeaderWithSorting column={column} header="Phone" />;
-      },
-      cell: ({ row }) => {
-        return <div>{row.original.restaurant?.phone ?? "-"}</div>;
-      },
-    },
-    {
       id: "isSuperUser",
       accessorKey: "isSuperUser",
       header: ({ column }) => {
@@ -84,6 +72,24 @@ const UserTable = ({
           <Badge variant={row.original.isSuperUser ? "secondary" : "outline"}>
             {row.original.isSuperUser ? "Super User" : "Restaurant"}
           </Badge>
+        );
+      },
+    },
+    {
+      id: "lastLogin",
+      accessorKey: "lastLogin",
+      header: ({ column }) => {
+        return (
+          <DataTableHeaderWithSorting column={column} header="Last Login" />
+        );
+      },
+      cell: ({ row }) => {
+        return (
+          <div>
+            {row.original.lastLogin
+              ? format(row.original.lastLogin, "yyyy-MM-dd HH:mm a")
+              : "Never"}
+          </div>
         );
       },
     },

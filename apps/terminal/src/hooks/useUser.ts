@@ -21,12 +21,9 @@ const useUser = () => {
   const handleVerifyCode = async (code: string): Promise<boolean> => {
     try {
       setLoading(true);
-      const response = await ApiInstance.post(
-        `${baseUrl}/api/auth/verify-code`,
-        {
-          code: code,
-        }
-      );
+      const response = await ApiInstance.post(`${baseUrl}/auth/verify-code`, {
+        code: code,
+      });
       if (response.status === 200 || response.status === 201) {
         return true;
       } else {
@@ -44,7 +41,7 @@ const useUser = () => {
     try {
       setLoading(true);
       const { status } = await ApiInstance.post(
-        `${baseUrl}/api/auth/send-verify-code`
+        `${baseUrl}/auth/send-verify-code`
       );
       if (status === 200 || status === 201) {
         return true;
@@ -61,10 +58,7 @@ const useUser = () => {
 
   const handleRegister = async (dataUser: ICreateUser): Promise<boolean> => {
     try {
-      const { data } = await axios.post(
-        `${baseUrl}/api/auth/register`,
-        dataUser
-      );
+      const { data } = await axios.post(`${baseUrl}/auth/register`, dataUser);
       if (data.ok) {
         navigate("/login");
         return true;
@@ -79,7 +73,7 @@ const useUser = () => {
 
   const handleLogin = async (dataLogin: ILogin) => {
     try {
-      const { data } = await axios.post(`${baseUrl}/api/auth/login`, dataLogin);
+      const { data } = await axios.post(`${baseUrl}/auth/login`, dataLogin);
 
       if (data.access_token) {
         Dispatch(onLoadUser(data.access_token));
@@ -92,7 +86,7 @@ const useUser = () => {
 
   const getItemByToken = async (token: string) => {
     try {
-      const { data } = await axios.get(`${baseUrl}/api/auth/profile`, {
+      const { data } = await axios.get(`${baseUrl}/auth/profile`, {
         headers: { Authorization: "Bearer " + token },
       });
 

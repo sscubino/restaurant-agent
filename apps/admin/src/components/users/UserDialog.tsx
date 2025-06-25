@@ -1,6 +1,5 @@
 import { zodResolver } from "@hookform/resolvers/zod";
 import { useForm } from "react-hook-form";
-import validator from "validator";
 import { z } from "zod";
 
 import { Button } from "@/components/ui/button";
@@ -34,11 +33,6 @@ const userSchema = z.object({
     .string()
     .min(1, "Password is required")
     .min(8, "Password must be at least 8 characters long"),
-  companyName: z.string().min(1, "Company name is required"),
-  companyPhone: z
-    .string()
-    .min(1, "Phone number is required")
-    .refine(validator.isMobilePhone, "Invalid phone number"),
 });
 
 export type UserFormData = z.infer<typeof userSchema>;
@@ -58,8 +52,6 @@ const UserDialog = ({ isOpen, setIsOpen, handleSubmit }: UserDialogProps) => {
       lastName: "",
       email: "",
       password: "",
-      companyName: "",
-      companyPhone: "",
     },
     mode: "onBlur",
   });
@@ -149,32 +141,6 @@ const UserDialog = ({ isOpen, setIsOpen, handleSubmit }: UserDialogProps) => {
                         placeholder="Enter password"
                         {...field}
                       />
-                    </FormControl>
-                    <FormMessage />
-                  </FormItem>
-                )}
-              />
-              <FormField
-                control={form.control}
-                name="companyName"
-                render={({ field }) => (
-                  <FormItem>
-                    <FormLabel>Company Name</FormLabel>
-                    <FormControl>
-                      <Input placeholder="Acme Corp" {...field} />
-                    </FormControl>
-                    <FormMessage />
-                  </FormItem>
-                )}
-              />
-              <FormField
-                control={form.control}
-                name="companyPhone"
-                render={({ field }) => (
-                  <FormItem>
-                    <FormLabel>Phone Number</FormLabel>
-                    <FormControl>
-                      <Input placeholder="+1 (555) 123-4567" {...field} />
                     </FormControl>
                     <FormMessage />
                   </FormItem>

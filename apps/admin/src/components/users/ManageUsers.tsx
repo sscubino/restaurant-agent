@@ -3,9 +3,8 @@ import { toast } from "sonner";
 
 import DeleteUserAlertDialog from "@/components/users/DeleteUserAlertDialog";
 import UserDialog, { type UserFormData } from "@/components/users/UserDialog";
-import { register } from "@/services/api/register";
 import type { User } from "@/services/api/users";
-import { deleteUser, getUsers } from "@/services/api/users";
+import { createUser, deleteUser, getUsers } from "@/services/api/users";
 
 import { UserTable } from "./UserTable";
 
@@ -34,7 +33,7 @@ export default function ManageUsers() {
 
   const handleCreateUser = async (userData: UserFormData) => {
     try {
-      await register(userData);
+      await createUser(userData);
       toast.success("User created successfully");
       loadUsers();
     } catch (error) {

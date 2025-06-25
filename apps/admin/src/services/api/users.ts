@@ -1,4 +1,5 @@
 import api from "@/lib/api";
+import type { Restaurant } from "@/services/api/restaurants";
 
 export interface User {
   id: string;
@@ -6,22 +7,29 @@ export interface User {
   lastName: string;
   email: string;
   isSuperUser: boolean;
-  restaurant?: Restaurant;
+  lastLogin: string | null;
+  restaurant?: Omit<Restaurant, "user">;
   createdAt: string;
   updatedAt: string;
 }
 
-export interface Restaurant {
-  id: string;
-  name: string;
-  phone: string;
+export interface CreateUserDto {
+  firstName: string;
+  lastName: string;
+  email: string;
+  password: string;
 }
 
+export const createUser = async (userData: CreateUserDto): Promise<User> => {
+  const response = await api.post("/users", userData);
+  return response.data;
+};
+
 export const getUsers = async (): Promise<User[]> => {
-  const response = await api.get("/api/users");
+  const response = await api.get("/users");
   return response.data;
 };
 
 export const deleteUser = async (id: string): Promise<void> => {
-  await api.delete(`/api/users/${id}`);
+  await api.delete(`/users/${id}`);
 };

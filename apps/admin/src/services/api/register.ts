@@ -1,4 +1,5 @@
 import api from "@/lib/api";
+import type { User } from "@/services/api/users";
 
 export interface RegisterUserData {
   email: string;
@@ -9,7 +10,7 @@ export interface RegisterUserData {
   companyPhone: string;
 }
 
-export const register = async (userData: RegisterUserData) => {
-  const response = await api.post("/api/auth/register", userData);
+export const register = async (userData: RegisterUserData): Promise<User> => {
+  const response = await api.post("/admin/restaurant-user", userData);
   return response.data;
 };

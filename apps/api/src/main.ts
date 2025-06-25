@@ -1,25 +1,56 @@
+import { ValidationPipe } from '@nestjs/common';
 import { NestFactory } from '@nestjs/core';
-import { AppModule } from './app.module';
-import * as dotenv from 'dotenv';
 import { WsAdapter } from '@nestjs/platform-ws';
-import { AppLogger } from './logger.service';
+import { DocumentBuilder, SwaggerModule } from '@nestjs/swagger';
 
-dotenv.config();
+import { AppModule } from './app.module';
 
 async function bootstrap() {
   const app = await NestFactory.create(AppModule);
-  const logger = new AppLogger();
 
-  app.useLogger(logger);
-  logger.log('Application is starting...');
-  app.enableCors({
-    origin: '*',
-    methods: 'GET,POST,PUT,DELETE',
-    allowedHeaders: 'Content-Type, Authorization',
-  });
+  app.setGlobalPrefix('api');
+
+  app.useGlobalPipes(
+    new ValidationPipe({
+      transform: true,
+      whitelist: true,
+    }),
+  );
+
+  app.enableCors();
+
+  // Swagger configuration
+  const config = new DocumentBuilder()
+    .setTitle('Restaurant API')
+    .setDescription('The Restaurant API documentation')
+    .setVersion('1.0')
+    .addBearerAuth(
+      {
+        type: 'http',
+        scheme: 'bearer',
+        bearerFormat: 'JWT',
+        name: 'JWT',
+        description: 'Enter JWT token',
+        in: 'header',
+      },
+      'JWT-auth', // This name here is important for matching up with @ApiBearerAuth() in your controller!
+    )
+    .build();
+
+  const document = SwaggerModule.createDocument(app, config);
+  SwaggerModule.setup('api/docs', app, document);
 
   app.useWebSocketAdapter(new WsAdapter(app));
 
-  await app.listen(process.env.PORT ?? 3000);
+  const port = process.env.PORT || 3000;
+  await app.listen(port);
+
+  console.log(`
+    =========================================================
+    Application is running on: http://localhost:${port}/api
+    API Documentation available at: http://localhost:${port}/api/docs
+    =========================================================
+  `);
 }
-bootstrap();
+
+void bootstrap();

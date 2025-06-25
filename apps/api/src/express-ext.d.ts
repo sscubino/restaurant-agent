@@ -1,19 +1,5 @@
 declare namespace Express {
   export interface Request {
-    user: {
-      id: number;
-      email: string;
-    };
+    user?: import('@/modules/users/entities/user.entity').User;
   }
 }
-
-// declare module 'express' {
-//   interface Request {
-//     user: {
-//       id: number;
-//       email: string;
-//     };
-//   }
-// }
-
-// export {};
