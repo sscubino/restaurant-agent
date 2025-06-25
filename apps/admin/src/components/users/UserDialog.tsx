@@ -3,6 +3,7 @@ import { useForm } from "react-hook-form";
 import { z } from "zod";
 
 import { Button } from "@/components/ui/button";
+import { Checkbox } from "@/components/ui/checkbox";
 import {
   Dialog,
   DialogContent,
@@ -20,6 +21,7 @@ import {
   FormMessage,
 } from "@/components/ui/form";
 import { Input } from "@/components/ui/input";
+import { useCreateUser } from "@/hooks/useUsers";
 import type { User } from "@/services/api/users";
 
 const userSchema = z.object({
@@ -33,6 +35,7 @@ const userSchema = z.object({
     .string()
     .min(1, "Password is required")
     .min(8, "Password must be at least 8 characters long"),
+  isSuperUser: z.boolean(),
 });
 
 export type UserFormData = z.infer<typeof userSchema>;
@@ -41,10 +44,11 @@ interface UserDialogProps {
   user?: User;
   isOpen: boolean;
   setIsOpen: (isOpen: boolean) => void;
-  handleSubmit: (data: UserFormData) => void;
 }
 
-const UserDialog = ({ isOpen, setIsOpen, handleSubmit }: UserDialogProps) => {
+const UserDialog = ({ isOpen, setIsOpen }: UserDialogProps) => {
+  const { mutateAsync: createUser } = useCreateUser();
+
   const form = useForm<UserFormData>({
     resolver: zodResolver(userSchema),
     defaultValues: {
@@ -52,14 +56,17 @@ const UserDialog = ({ isOpen, setIsOpen, handleSubmit }: UserDialogProps) => {
       lastName: "",
       email: "",
       password: "",
+      isSuperUser: false,
     },
     mode: "onBlur",
   });
 
   const onSubmit = (data: UserFormData) => {
-    handleSubmit(data);
-    form.reset();
-    setIsOpen(false);
+    createUser(data, {
+      onSuccess: () => {
+        setIsOpen(false);
+      },
+    });
   };
 
   const handleDialogOpenChange = (open: boolean) => {
@@ -142,6 +149,22 @@ const UserDialog = ({ isOpen, setIsOpen, handleSubmit }: UserDialogProps) => {
                         {...field}
                       />
                     </FormControl>
+                    <FormMessage />
+                  </FormItem>
+                )}
+              />
+              <FormField
+                control={form.control}
+                name="isSuperUser"
+                render={({ field }) => (
+                  <FormItem className="flex flex-row items-center">
+                    <FormControl>
+                      <Checkbox
+                        checked={field.value}
+                        onCheckedChange={field.onChange}
+                      />
+                    </FormControl>
+                    <FormLabel>Is super user</FormLabel>
                     <FormMessage />
                   </FormItem>
                 )}

@@ -8,21 +8,30 @@ import {
   AlertDialogHeader,
   AlertDialogTitle,
 } from "@/components/ui/alert-dialog";
+import { useDeleteUser } from "@/hooks/useUsers";
 import type { User } from "@/services/api/users";
 
 interface DeleteUserAlertDialogProps {
   isOpen: boolean;
   setIsOpen: (isOpen: boolean) => void;
   user?: User;
-  handleDeleteUser: (userId: string) => void;
 }
 
 const DeleteUserAlertDialog = ({
   isOpen,
   setIsOpen,
   user,
-  handleDeleteUser,
 }: DeleteUserAlertDialogProps) => {
+  const deleteUser = useDeleteUser();
+
+  const handleDelete = () => {
+    deleteUser.mutate(user!.id, {
+      onSuccess: () => {
+        setIsOpen(false);
+      },
+    });
+  };
+
   return (
     <AlertDialog open={isOpen} onOpenChange={setIsOpen}>
       <AlertDialogContent>
@@ -38,9 +47,7 @@ const DeleteUserAlertDialog = ({
         </AlertDialogHeader>
         <AlertDialogFooter>
           <AlertDialogCancel>Cancel</AlertDialogCancel>
-          <AlertDialogAction onClick={() => handleDeleteUser(user!.id)}>
-            Delete
-          </AlertDialogAction>
+          <AlertDialogAction onClick={handleDelete}>Delete</AlertDialogAction>
         </AlertDialogFooter>
       </AlertDialogContent>
     </AlertDialog>

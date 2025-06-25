@@ -50,10 +50,8 @@ export class AdminService {
   }
 
   async deleteRestaurant(id: string) {
-    await this.dataSource.transaction(async (entityManager) => {
-      await this.restaurantsService.remove(id, entityManager);
-      await this.usersService.remove(id, entityManager);
-    });
+    const restaurant = await this.restaurantsService.findOne(id);
+    await this.usersService.remove(restaurant.user.id);
   }
 
   async updateRestaurant(id: string, updateDto: UpdateRestaurantDto) {

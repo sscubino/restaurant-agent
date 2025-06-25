@@ -1,6 +1,5 @@
 import { zodResolver } from "@hookform/resolvers/zod";
 import { useForm } from "react-hook-form";
-import { useNavigate } from "react-router";
 import { z } from "zod";
 
 import { Button } from "@/components/ui/button";
@@ -13,10 +12,7 @@ import {
   FormMessage,
 } from "@/components/ui/form";
 import { Input } from "@/components/ui/input";
-import { RoutePaths } from "@/config/types";
-import { useAuth } from "@/contexts/AuthContext";
-import { getAxiosErrorMessage } from "@/lib/utils";
-import { login } from "@/services/api/login";
+import { useLogin } from "@/hooks/useAuth";
 
 const loginSchema = z.object({
   email: z
@@ -29,9 +25,6 @@ const loginSchema = z.object({
 type LoginFormData = z.infer<typeof loginSchema>;
 
 function LoginForm() {
-  const navigate = useNavigate();
-  const { setIsLoggedIn } = useAuth();
-
   const form = useForm<LoginFormData>({
     resolver: zodResolver(loginSchema),
     defaultValues: {
@@ -40,14 +33,16 @@ function LoginForm() {
     },
   });
 
+  const loginMutation = useLogin();
+
   const onSubmit = async (data: LoginFormData) => {
     try {
-      await login(data.email, data.password);
-      setIsLoggedIn(true);
-      navigate(RoutePaths.HOME);
+      await loginMutation.mutateAsync({
+        email: data.email,
+        password: data.password,
+      });
     } catch (err: unknown) {
-      const errorMessage = getAxiosErrorMessage(err);
-      form.setError("root", { message: errorMessage });
+      form.setError("root", { message: (err as Error).message });
     }
   };
 
@@ -98,9 +93,11 @@ function LoginForm() {
         <Button
           type="submit"
           className="w-full"
-          disabled={form.formState.isSubmitting}
+          disabled={form.formState.isSubmitting || loginMutation.isPending}
         >
-          {form.formState.isSubmitting ? "Signing in..." : "Sign in"}
+          {form.formState.isSubmitting || loginMutation.isPending
+            ? "Signing in..."
+            : "Sign in"}
         </Button>
       </form>
     </Form>

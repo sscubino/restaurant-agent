@@ -1,6 +1,5 @@
 import { zodResolver } from "@hookform/resolvers/zod";
 import { useForm } from "react-hook-form";
-import { toast } from "sonner";
 import validator from "validator";
 import { z } from "zod";
 
@@ -22,8 +21,7 @@ import {
   FormMessage,
 } from "@/components/ui/form";
 import { Input } from "@/components/ui/input";
-import { getAxiosErrorMessage } from "@/lib/utils";
-import { register } from "@/services/api/register";
+import { useCreateRestaurant } from "@/hooks/useRestaurants";
 import type { Restaurant } from "@/services/api/restaurants";
 
 const restaurantSchema = z.object({
@@ -50,14 +48,11 @@ interface RestaurantDialogProps {
   restaurant?: Restaurant;
   isOpen: boolean;
   setIsOpen: (isOpen: boolean) => void;
-  handleRestaurantCreated: (data: RestaurantFormData) => void;
 }
 
-const RestaurantDialog = ({
-  isOpen,
-  setIsOpen,
-  handleRestaurantCreated,
-}: RestaurantDialogProps) => {
+const RestaurantDialog = ({ isOpen, setIsOpen }: RestaurantDialogProps) => {
+  const { mutateAsync: createRestaurant } = useCreateRestaurant();
+
   const form = useForm<RestaurantFormData>({
     resolver: zodResolver(restaurantSchema),
     defaultValues: {
@@ -71,20 +66,12 @@ const RestaurantDialog = ({
     mode: "onBlur",
   });
 
-  const onSubmit = async (data: RestaurantFormData) => {
-    try {
-      await register(data);
-      toast.success("Restaurant created successfully");
-      handleRestaurantCreated(data);
-      setIsOpen(false);
-    } catch (error) {
-      const errorMessage = getAxiosErrorMessage(
-        error,
-        "Failed to create restaurant"
-      );
-      toast.error(errorMessage);
-      console.error("Error creating restaurant:", error);
-    }
+  const onSubmit = (data: RestaurantFormData) => {
+    createRestaurant(data, {
+      onSuccess: () => {
+        setIsOpen(false);
+      },
+    });
   };
 
   const title = "Create New Restaurant";

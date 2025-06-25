@@ -4,8 +4,8 @@ import {
   Delete,
   Get,
   Param,
+  Patch,
   Post,
-  Put,
   UseGuards,
 } from '@nestjs/common';
 import {
@@ -75,7 +75,7 @@ export class AdminController {
     return this.adminService.deleteRestaurant(id);
   }
 
-  @Put('restaurant-user/:id')
+  @Patch('restaurant-user/:id')
   @ApiOperation({ summary: 'Update a restaurant' })
   @ApiResponse({
     status: 200,

@@ -18,6 +18,7 @@ export interface CreateUserDto {
   lastName: string;
   email: string;
   password: string;
+  isSuperUser: boolean;
 }
 
 export const createUser = async (userData: CreateUserDto): Promise<User> => {

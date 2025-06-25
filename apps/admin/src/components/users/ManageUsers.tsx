@@ -1,57 +1,17 @@
-import { useEffect, useState } from "react";
-import { toast } from "sonner";
+import { useState } from "react";
 
 import DeleteUserAlertDialog from "@/components/users/DeleteUserAlertDialog";
-import UserDialog, { type UserFormData } from "@/components/users/UserDialog";
-import type { User } from "@/services/api/users";
-import { createUser, deleteUser, getUsers } from "@/services/api/users";
+import UserDialog from "@/components/users/UserDialog";
+import { useUsers } from "@/hooks/useUsers";
 
 import { UserTable } from "./UserTable";
 
 export default function ManageUsers() {
-  const [users, setUsers] = useState<User[]>([]);
-  const [isLoading, setIsLoading] = useState(true);
   const [isUserDialogOpen, setIsUserDialogOpen] = useState(false);
   const [isDeleteDialogOpen, setIsDeleteDialogOpen] = useState(false);
-  const [deletingUser, setDeletingUser] = useState<User | null>(null);
+  const [deletingUserId, setDeletingUserId] = useState<string | null>(null);
 
-  useEffect(() => {
-    loadUsers();
-  }, []);
-
-  const loadUsers = async () => {
-    try {
-      setIsLoading(true);
-      const fetchedUsers = await getUsers();
-      setUsers(fetchedUsers);
-    } catch (error) {
-      console.error("Error loading users:", error);
-    } finally {
-      setIsLoading(false);
-    }
-  };
-
-  const handleCreateUser = async (userData: UserFormData) => {
-    try {
-      await createUser(userData);
-      toast.success("User created successfully");
-      loadUsers();
-    } catch (error) {
-      toast.error("Failed to create user");
-      console.error("Error creating user:", error);
-    }
-  };
-
-  const handleDeleteUser = async (userId: string) => {
-    try {
-      await deleteUser(userId);
-      setUsers(users.filter((user) => user.id !== userId));
-      toast.success("User deleted successfully");
-    } catch (error) {
-      toast.error("Failed to delete user");
-      console.error("Error deleting user:", error);
-    }
-  };
+  const { data: users = [], isLoading } = useUsers();
 
   const handleOpenCreateDialog = () => {
     setIsUserDialogOpen(true);
@@ -59,8 +19,10 @@ export default function ManageUsers() {
 
   const handleOpenDeleteDialog = (userId: string) => {
     setIsDeleteDialogOpen(true);
-    setDeletingUser(users.find((user) => user.id === userId)!);
+    setDeletingUserId(userId);
   };
+
+  const deletingUser = users.find((u) => u.id === deletingUserId) || null;
 
   return (
     <>
@@ -70,16 +32,11 @@ export default function ManageUsers() {
         handleCreateUser={handleOpenCreateDialog}
         isLoading={isLoading}
       />
-      <UserDialog
-        isOpen={isUserDialogOpen}
-        setIsOpen={setIsUserDialogOpen}
-        handleSubmit={handleCreateUser}
-      />
+      <UserDialog isOpen={isUserDialogOpen} setIsOpen={setIsUserDialogOpen} />
       <DeleteUserAlertDialog
         user={deletingUser!}
         isOpen={isDeleteDialogOpen}
         setIsOpen={setIsDeleteDialogOpen}
-        handleDeleteUser={handleDeleteUser}
       />
     </>
   );

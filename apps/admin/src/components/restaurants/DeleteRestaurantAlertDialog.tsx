@@ -8,21 +8,30 @@ import {
   AlertDialogHeader,
   AlertDialogTitle,
 } from "@/components/ui/alert-dialog";
+import { useDeleteRestaurant } from "@/hooks/useRestaurants";
 import type { Restaurant } from "@/services/api/restaurants";
 
 interface DeleteRestaurantAlertDialogProps {
   isOpen: boolean;
   setIsOpen: (isOpen: boolean) => void;
   restaurant?: Restaurant;
-  handleDeleteRestaurant: (restaurantId: string) => void;
 }
 
 const DeleteRestaurantAlertDialog = ({
   isOpen,
   setIsOpen,
   restaurant,
-  handleDeleteRestaurant,
 }: DeleteRestaurantAlertDialogProps) => {
+  const deleteRestaurant = useDeleteRestaurant();
+
+  const handleDelete = () => {
+    deleteRestaurant.mutate(restaurant!.id, {
+      onSuccess: () => {
+        setIsOpen(false);
+      },
+    });
+  };
+
   return (
     <AlertDialog open={isOpen} onOpenChange={setIsOpen}>
       <AlertDialogContent>
@@ -36,11 +45,7 @@ const DeleteRestaurantAlertDialog = ({
         </AlertDialogHeader>
         <AlertDialogFooter>
           <AlertDialogCancel>Cancel</AlertDialogCancel>
-          <AlertDialogAction
-            onClick={() => handleDeleteRestaurant(restaurant!.id)}
-          >
-            Delete
-          </AlertDialogAction>
+          <AlertDialogAction onClick={handleDelete}>Delete</AlertDialogAction>
         </AlertDialogFooter>
       </AlertDialogContent>
     </AlertDialog>
