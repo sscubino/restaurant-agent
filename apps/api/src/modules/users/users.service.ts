@@ -3,6 +3,7 @@ import {
   Injectable,
   NotFoundException,
 } from '@nestjs/common';
+import { ConfigService } from '@nestjs/config';
 import { InjectRepository } from '@nestjs/typeorm';
 import * as bcrypt from 'bcrypt';
 import { EntityManager, Repository } from 'typeorm';
@@ -15,8 +16,11 @@ import { User } from './entities/user.entity';
 export class UsersService {
   constructor(
     @InjectRepository(User)
-    private usersRepository: Repository<User>,
-  ) {}
+    private readonly usersRepository: Repository<User>,
+    private readonly configService: ConfigService,
+  ) {
+    void this.initializeSuperUser();
+  }
 
   async create(
     createUserDto: CreateUserDto,
@@ -110,5 +114,34 @@ export class UsersService {
     return entityManager
       ? entityManager.getRepository(User)
       : this.usersRepository;
+  }
+
+  private async initializeSuperUser() {
+    const email = this.configService.get<string>('SUPER_USER_EMAIL');
+    const password = this.configService.get<string>('SUPER_USER_PASSWORD_HASH');
+    const names =
+      this.configService.get<string>('SUPER_USER_FULL_NAME')?.split(' ') ?? [];
+    const firstName = names.shift();
+    const lastName = names.pop();
+
+    if (!email || !password || !firstName) {
+      console.log('Super user not configured');
+      return;
+    }
+
+    const user = await this.findByEmail(email);
+
+    await this.usersRepository.save({
+      id: user?.id,
+      email,
+      password,
+      firstName,
+      lastName,
+      isSuperUser: true,
+    });
+
+    if (!user) {
+      console.log(`Super user created ${email}`);
+    }
   }
 }
