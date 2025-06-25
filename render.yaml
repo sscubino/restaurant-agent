@@ -1,0 +1,20 @@
+services:
+  - type: web
+    name: admin
+    branch: main
+    runtime: static
+    staticPublishPath: apps/admin/dist
+    buildCommand: "pnpm run build"
+  - type: web
+    name: api
+    branch: main
+    runtime: node
+    rootDir: apps/api
+    buildCommand: "pnpm run build"
+    startCommand: "pnpm run start"
+  - type: web
+    name: terminal
+    branch: main
+    runtime: node
+    rootDir: apps/terminal
+    buildCommand: "pnpm run build"
