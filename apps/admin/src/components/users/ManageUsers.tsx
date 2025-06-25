@@ -62,16 +62,13 @@ export default function ManageUsers() {
     setDeletingUser(users.find((user) => user.id === userId)!);
   };
 
-  if (isLoading) {
-    return <div>Loading users...</div>;
-  }
-
   return (
     <>
       <UserTable
         users={users}
         handleDeleteUser={handleOpenDeleteDialog}
         handleCreateUser={handleOpenCreateDialog}
+        isLoading={isLoading}
       />
       <UserDialog
         isOpen={isUserDialogOpen}

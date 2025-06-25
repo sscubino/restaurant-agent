@@ -82,7 +82,8 @@ const RestaurantDialog = ({
         error,
         "Failed to create restaurant"
       );
-      form.setError("root", { message: errorMessage });
+      toast.error(errorMessage);
+      console.error("Error creating restaurant:", error);
     }
   };
 
@@ -189,11 +190,6 @@ const RestaurantDialog = ({
                   </FormItem>
                 )}
               />
-              {form.formState.errors.root && (
-                <div className="text-red-600 text-sm text-center">
-                  {form.formState.errors.root.message}
-                </div>
-              )}
             </div>
             <DialogFooter>
               <Button type="submit" disabled={form.formState.isSubmitting}>

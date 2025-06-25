@@ -18,12 +18,14 @@ interface RestaurantsTableProps {
   restaurants: Restaurant[];
   handleDeleteRestaurant: (restaurantId: string) => void;
   handleCreateRestaurant: () => void;
+  isLoading?: boolean;
 }
 
 const RestaurantsTable = ({
   restaurants: restaurants,
   handleDeleteRestaurant,
   handleCreateRestaurant,
+  isLoading = false,
 }: RestaurantsTableProps) => {
   const columns: ColumnDef<Restaurant>[] = [
     {
@@ -121,6 +123,7 @@ const RestaurantsTable = ({
     <DataTable
       columns={columns}
       data={restaurants}
+      isLoading={isLoading}
       actionButtons={
         <Button onClick={handleCreateRestaurant}>
           <Plus className="h-4 w-4" />

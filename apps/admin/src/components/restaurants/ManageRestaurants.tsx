@@ -10,8 +10,6 @@ import {
   type Restaurant,
 } from "@/services/api/restaurants";
 
-import { DataTableLoadingState } from "../DataTable";
-
 export default function ManageRestaurants() {
   const [restaurants, setRestaurants] = useState<Restaurant[]>([]);
   const [isLoading, setIsLoading] = useState(true);
@@ -66,15 +64,12 @@ export default function ManageRestaurants() {
 
   return (
     <>
-      {isLoading ? (
-        <DataTableLoadingState />
-      ) : (
-        <RestaurantsTable
-          restaurants={restaurants}
-          handleDeleteRestaurant={handleOpenDeleteDialog}
-          handleCreateRestaurant={handleOpenCreateDialog}
-        />
-      )}
+      <RestaurantsTable
+        restaurants={restaurants}
+        handleDeleteRestaurant={handleOpenDeleteDialog}
+        handleCreateRestaurant={handleOpenCreateDialog}
+        isLoading={isLoading}
+      />
       <RestaurantDialog
         isOpen={isRestaurantDialogOpen}
         setIsOpen={setIsRestaurantDialogOpen}

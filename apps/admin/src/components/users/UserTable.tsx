@@ -19,12 +19,14 @@ interface UserTableProps {
   users: User[];
   handleDeleteUser: (userId: string) => void;
   handleCreateUser: () => void;
+  isLoading?: boolean;
 }
 
 const UserTable = ({
   users,
   handleDeleteUser,
   handleCreateUser,
+  isLoading = false,
 }: UserTableProps) => {
   const columns: ColumnDef<User>[] = [
     {
@@ -140,6 +142,7 @@ const UserTable = ({
     <DataTable
       columns={columns}
       data={users}
+      isLoading={isLoading}
       actionButtons={
         <Button onClick={handleCreateUser}>
           <Plus className="h-4 w-4" />
