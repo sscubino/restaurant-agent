@@ -5,10 +5,6 @@ import {
 } from '@nestjs/common';
 import { ConfigService } from '@nestjs/config';
 import * as twilio from 'twilio';
-import {
-  ParameterAttributes,
-  SayAttributes,
-} from 'twilio/lib/twiml/VoiceResponse';
 
 import { RestaurantTwilioCallsService } from '@/modules/restaurants/services/restaurant-twilio-calls.service';
 
@@ -32,8 +28,6 @@ export class TwilioService {
     this.twilioClient = twilio(accountSid, authToken);
     this.INCOMING_CALL_WEBHOOK = `${base_url}/api/twilio/incoming-call`;
     this.END_CALL_WEBHOOK = `${base_url}/api/twilio/call-status-change`;
-    console.log('this.INCOMING_CALL_WEBHOOK', this.INCOMING_CALL_WEBHOOK);
-    console.log('this.END_CALL_WEBHOOK', this.END_CALL_WEBHOOK);
   }
 
   async handleIncomingCall(body: TwilioVoiceWebhookDto) {
@@ -65,34 +59,6 @@ export class TwilioService {
     return twiml;
   }
 
-  buildWebhookResponse({
-    websocket,
-    say,
-  }: {
-    websocket?: {
-      url: string;
-      params?: ParameterAttributes[];
-    };
-    say?: { attributes: SayAttributes; message: string };
-  }) {
-    const twiml = new twilio.twiml.VoiceResponse();
-
-    if (say) {
-      twiml.say(say.attributes, say.message);
-    }
-
-    if (websocket) {
-      const stream = twiml.connect().stream({
-        url: websocket.url,
-      });
-      websocket.params?.forEach((param) => {
-        stream.parameter(param);
-      });
-    }
-
-    return twiml;
-  }
-
   async makeCall(from: string, to: string) {
     const incomingCallWebhook = `${this.INCOMING_CALL_WEBHOOK}`;
     const endCallWebhook = `${this.END_CALL_WEBHOOK}`;
@@ -102,9 +68,6 @@ export class TwilioService {
     console.log('to', to);
     console.log('INCOMING_CALL_WEBHOOK', incomingCallWebhook);
     console.log('END_CALL_WEBHOOK', endCallWebhook);
-    console.log('--------------------------------');
-    console.log('--------------------------------');
-    console.log('--------------------------------');
     console.log('--------------------------------');
     try {
       return this.twilioClient.calls.create({
