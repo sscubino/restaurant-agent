@@ -2,7 +2,7 @@ import * as React from "react";
 import { Link, useLocation, useNavigate } from "react-router-dom";
 import { GoHome } from "react-icons/go";
 import useUser from "../hooks/useUser";
-import { CiCreditCard1, CiLink, CiMobile3 } from "react-icons/ci";
+import { CiCreditCard1, CiMobile3 } from "react-icons/ci";
 import { GiForkKnifeSpoon } from "react-icons/gi";
 import { MdKeyboardArrowLeft } from "react-icons/md";
 import { MdKeyboardArrowRight } from "react-icons/md";
