@@ -6,11 +6,10 @@ import {
   validateEvent,
   WebhookVerificationError,
 } from '@polar-sh/sdk/webhooks';
-import { Request } from 'express';
+import { IncomingHttpHeaders } from 'http';
 import { Repository } from 'typeorm';
 
 import { PolarSubscription } from '../entities/polar-subscription.entity';
-import { IncomingHttpHeaders } from 'http';
 
 @Injectable()
 export class PolarWebhookService {
