@@ -1,6 +1,6 @@
 import axios from "axios";
 
-import { getToken } from "@/lib/auth-storage";
+import { getToken, removeToken } from "@/lib/auth-storage";
 
 const API_URL = import.meta.env.VITE_API_URL;
 
@@ -22,7 +22,7 @@ api.interceptors.response.use(
   },
   (error) => {
     if (error?.response?.status === 401) {
-      localStorage.removeItem("token");
+      removeToken();
       if (window.location.pathname !== "/login") {
         window.location.href = "/login";
       }
