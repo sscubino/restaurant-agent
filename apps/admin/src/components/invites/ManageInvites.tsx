@@ -4,7 +4,6 @@ import DeleteInviteAlertDialog from "@/components/invites/DeleteInviteAlertDialo
 import InviteDialog from "@/components/invites/InviteDialog";
 import InvitesTable from "@/components/invites/InvitesTable";
 import { useInviteCodes } from "@/hooks/useInviteCodes";
-import { getInviteLink } from "@/lib/invite-link";
 
 export default function ManageInvites() {
   const [isInviteDialogOpen, setIsInviteDialogOpen] = useState(false);
@@ -15,6 +14,10 @@ export default function ManageInvites() {
 
   const handleOpenCreateDialog = () => {
     setIsInviteDialogOpen(true);
+  };
+
+  const getInviteLink = (inviteCode: string) => {
+    return `${import.meta.env.VITE_FRONTEND_URL}/register?inviteCode=${inviteCode}`;
   };
 
   const handleCopyInviteLink = (inviteCode: string) => {

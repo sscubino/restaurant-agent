@@ -10,6 +10,22 @@ export interface Restaurant {
   updatedAt: string;
 }
 
+export interface CreateRestaurantUserData {
+  email: string;
+  firstName: string;
+  lastName: string;
+  password: string;
+  companyName: string;
+  companyPhone: string;
+}
+
+export const createRestaurant = async (
+  userData: CreateRestaurantUserData
+): Promise<User> => {
+  const response = await api.post("/admin/restaurant-user", userData);
+  return response.data;
+};
+
 export const getRestaurants = async (): Promise<Restaurant[]> => {
   const response = await api.get("/admin/restaurant-user");
   return response.data;

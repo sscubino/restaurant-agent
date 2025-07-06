@@ -1,4 +1,14 @@
-import { HomeIcon, KeyRound, LayoutDashboard, LogOut } from "lucide-react";
+import {
+  Check,
+  HomeIcon,
+  KeyRound,
+  LogOut,
+  Monitor,
+  Moon,
+  MoreVertical,
+  Sun,
+  UserLock,
+} from "lucide-react";
 import { StoreIcon, UsersIcon } from "lucide-react";
 import { Link, useLocation } from "react-router";
 
@@ -13,10 +23,26 @@ import {
   SidebarMenu,
   SidebarMenuButton,
   SidebarMenuItem,
+  useSidebar,
 } from "@/components/ui/sidebar";
 import { RoutePaths } from "@/config/types";
+import { useTheme } from "@/contexts/ThemeContext";
 import { useProfile } from "@/hooks/useProfile";
 import { cn } from "@/lib/utils";
+
+import { Avatar, AvatarFallback } from "./ui/avatar";
+import {
+  DropdownMenu,
+  DropdownMenuContent,
+  DropdownMenuItem,
+  DropdownMenuLabel,
+  DropdownMenuPortal,
+  DropdownMenuSeparator,
+  DropdownMenuSub,
+  DropdownMenuSubContent,
+  DropdownMenuSubTrigger,
+  DropdownMenuTrigger,
+} from "./ui/dropdown-menu";
 
 interface NavigationLinkProps {
   href: string;
@@ -81,16 +107,7 @@ export function DashboardSidebar({ handleLogout }: SidebarProps) {
       </SidebarContent>
       <SidebarFooter>
         <SidebarMenu className="mt-auto">
-          <LoggedInUserInfo />
-          <SidebarMenuItem>
-            <SidebarMenuButton
-              onClick={handleLogout}
-              className="hover:text-destructive"
-            >
-              <LogOut className="size-5" />
-              Logout
-            </SidebarMenuButton>
-          </SidebarMenuItem>
+          <UserMenu handleLogout={handleLogout} />
         </SidebarMenu>
       </SidebarFooter>
     </Sidebar>
@@ -104,7 +121,7 @@ function SidebarHeaderButton() {
       className="data-[slot=sidebar-menu-button]:!p-1.5"
     >
       <Link to={RoutePaths.HOME} className="h-(--header-height) my-1">
-        <LayoutDashboard className="!size-5" />
+        <UserLock className="!size-5" />
         <span className="text-xl font-semibold">Admin Panel</span>
       </Link>
     </SidebarMenuButton>
@@ -133,16 +150,117 @@ function NavigationLink({ href, title, icon }: NavigationLinkProps) {
   );
 }
 
-function LoggedInUserInfo() {
+function UserMenu({ handleLogout }: { handleLogout: () => void }) {
   const { data: profile } = useProfile();
+  const { isMobile, state } = useSidebar();
+
+  const name = `${profile?.firstName || ""} ${profile?.lastName || ""}`;
+  const initials = `${profile?.firstName[0] || ""}${profile?.lastName[0] || ""}`;
+  const email = profile?.email || "";
+
   return (
-    <>
-      <span className="text-md text-muted-foreground">
-        {profile?.firstName} {profile?.lastName}
-      </span>
-      <span className="text-sm text-muted-foreground/60 mb-2 text-ellipsis overflow-hidden">
-        {profile?.email}
-      </span>
-    </>
+    <SidebarMenuItem>
+      <DropdownMenu>
+        <DropdownMenuTrigger asChild>
+          <SidebarMenuButton
+            size="lg"
+            className="data-[state=open]:bg-sidebar-accent data-[state=open]:text-sidebar-accent-foreground"
+          >
+            <Avatar className="h-8 w-8 rounded-lg">
+              <AvatarFallback className="rounded-lg">
+                {initials.toUpperCase()}
+              </AvatarFallback>
+            </Avatar>
+            <div
+              className={cn(
+                "grid flex-1 text-left text-sm truncate leading-tight mr-auto",
+                state === "collapsed" && "hidden"
+              )}
+            >
+              <span className="font-medium">{name}</span>
+              <span className="text-muted-foreground text-xs">{email}</span>
+            </div>
+            <MoreVertical className="size-4 ml-auto" />
+          </SidebarMenuButton>
+        </DropdownMenuTrigger>
+        <DropdownMenuContent
+          className="w-(--radix-dropdown-menu-trigger-width) min-w-56 rounded-lg"
+          align="end"
+          sideOffset={4}
+          side={isMobile ? "bottom" : "right"}
+        >
+          <DropdownMenuLabel className="p-0 font-normal">
+            <div className="flex items-center gap-2 px-1 py-1.5 text-left text-sm">
+              <div className="grid flex-1 text-left text-sm leading-tight">
+                <span className="truncate font-medium">
+                  {profile?.firstName} {profile?.lastName}
+                </span>
+                <span className="text-muted-foreground truncate text-xs">
+                  {profile?.email}
+                </span>
+              </div>
+            </div>
+          </DropdownMenuLabel>
+          <DropdownMenuSeparator />
+          {isMobile ? <MobileThemeSwitcher /> : <DesktopThemeSwitcher />}
+          <DropdownMenuSeparator />
+          <DropdownMenuItem onClick={handleLogout} variant="destructive">
+            <LogOut />
+            Log out
+          </DropdownMenuItem>
+        </DropdownMenuContent>
+      </DropdownMenu>
+    </SidebarMenuItem>
+  );
+}
+
+function DesktopThemeSwitcher() {
+  const { theme, setTheme } = useTheme();
+  return (
+    <DropdownMenuSub>
+      <DropdownMenuSubTrigger>Theme</DropdownMenuSubTrigger>
+      <DropdownMenuPortal>
+        <DropdownMenuSubContent>
+          <DropdownMenuItem onClick={() => setTheme("system")}>
+            {<Monitor />}
+            System
+            {theme === "system" && <Check className="ml-auto size-4" />}
+          </DropdownMenuItem>
+          <DropdownMenuItem onClick={() => setTheme("dark")}>
+            <Moon />
+            Dark
+            {theme === "dark" && <Check className="ml-auto size-4" />}
+          </DropdownMenuItem>
+          <DropdownMenuItem onClick={() => setTheme("light")}>
+            <Sun />
+            Light
+            {theme === "light" && <Check className="ml-auto size-4" />}
+          </DropdownMenuItem>
+        </DropdownMenuSubContent>
+      </DropdownMenuPortal>
+    </DropdownMenuSub>
+  );
+}
+
+function MobileThemeSwitcher() {
+  const { theme, setTheme } = useTheme();
+  return (
+    <DropdownMenu>
+      <DropdownMenuItem onClick={() => setTheme("system")}>
+        {<Monitor />}
+        System
+        {theme === "system" && <Check className="ml-auto size-4" />}
+      </DropdownMenuItem>
+      <DropdownMenuItem onClick={() => setTheme("dark")}>
+        <Moon />
+        Dark
+        {theme === "dark" && <Check className="ml-auto size-4" />}
+      </DropdownMenuItem>
+      <DropdownMenuItem onClick={() => setTheme("light")}>
+        <Sun />
+        Light
+        {theme === "light" && <Check className="ml-auto size-4" />}
+      </DropdownMenuItem>
+    </DropdownMenu>
   );
 }

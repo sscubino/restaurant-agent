@@ -42,7 +42,7 @@ const DeleteInviteAlertDialog = ({
             invite code <strong>{invite?.code}</strong> and remove it from our
             servers.
             {invite?.isUsed && (
-              <span className="block mt-2 text-accent-foreground">
+              <span className="block mt-2 text-amber-500 dark:text-amber-400">
                 Warning: This invite code has already been used by{" "}
                 {invite.usedBy?.email}.
               </span>

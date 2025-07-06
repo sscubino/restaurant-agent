@@ -1,6 +1,6 @@
 import type { ColumnDef } from "@tanstack/react-table";
 import { format } from "date-fns";
-import { MoreHorizontal, Plus } from "lucide-react";
+import { MoreHorizontal, Plus, Trash } from "lucide-react";
 
 import { DataTable, DataTableHeaderWithSorting } from "@/components/DataTable";
 import { Button } from "@/components/ui/button";
@@ -109,7 +109,9 @@ const RestaurantsTable = ({
               <DropdownMenuSeparator />
               <DropdownMenuItem
                 onClick={() => handleDeleteRestaurant(restaurant.id)}
+                variant="destructive"
               >
+                <Trash className="h-4 w-4" />
                 Delete restaurant
               </DropdownMenuItem>
             </DropdownMenuContent>

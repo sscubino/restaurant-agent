@@ -1,8 +1,12 @@
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 import { toast } from "sonner";
 
-import { register, type RegisterUserData } from "@/services/api/register";
-import { deleteRestaurant, getRestaurants } from "@/services/api/restaurants";
+import {
+  createRestaurant,
+  type CreateRestaurantUserData,
+  deleteRestaurant,
+  getRestaurants,
+} from "@/services/api/restaurants";
 
 // Query keys
 export const restaurantKeys = {
@@ -23,7 +27,8 @@ export const useCreateRestaurant = () => {
   const queryClient = useQueryClient();
 
   return useMutation({
-    mutationFn: (userData: RegisterUserData) => register(userData),
+    mutationFn: (userData: CreateRestaurantUserData) =>
+      createRestaurant(userData),
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: restaurantKeys.list() });
       toast.success("Restaurant created successfully");

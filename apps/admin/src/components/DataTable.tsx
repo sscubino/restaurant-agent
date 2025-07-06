@@ -298,7 +298,7 @@ export function DataTableHeaderWithSorting<TData, TValue>({
   return (
     <Button
       variant="ghost"
-      className="!p-0 w-full flex justify-start hover:bg-transparent"
+      className="!p-0 w-full flex justify-start !bg-transparent rounded-none hover:bg-transparent"
       onClick={handleSortingChange}
     >
       {header}

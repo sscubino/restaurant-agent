@@ -17,15 +17,15 @@ export interface InviteCodeDto {
   twilioPhoneNumber: string;
 }
 
-export const getInviteCodes = async (): Promise<InviteCode[]> => {
-  const response = await api.get("/invite-codes");
-  return response.data;
-};
-
 export const createInviteCode = async (
   inviteCode: InviteCodeDto
 ): Promise<InviteCode> => {
   const response = await api.post("/invite-codes", inviteCode);
+  return response.data;
+};
+
+export const getInviteCodes = async (): Promise<InviteCode[]> => {
+  const response = await api.get("/invite-codes");
   return response.data;
 };
 

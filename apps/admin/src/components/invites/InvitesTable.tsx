@@ -121,7 +121,6 @@ const InvitesTable = ({
     },
     {
       id: "actions",
-      header: "Actions",
       cell: ({ row }) => {
         const inviteCode = row.original;
 
@@ -140,15 +139,16 @@ const InvitesTable = ({
               <DropdownMenuSeparator />
               <DropdownMenuItem
                 onClick={() => handleCopyInviteLink(inviteCode.code)}
+                disabled={inviteCode.isUsed}
               >
                 <Copy className="h-4 w-4 text-inherit" />
                 Copy invite link
               </DropdownMenuItem>
               <DropdownMenuItem
                 onClick={() => handleDeleteInvite(inviteCode.id)}
-                className="text-destructive"
+                variant="destructive"
               >
-                <Trash className="h-4 w-4 text-inherit" />
+                <Trash className="h-4 w-4" />
                 Delete invite code
               </DropdownMenuItem>
             </DropdownMenuContent>

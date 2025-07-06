@@ -1,6 +1,6 @@
 import type { ColumnDef } from "@tanstack/react-table";
 import { format } from "date-fns";
-import { MoreHorizontal, Plus } from "lucide-react";
+import { MoreHorizontal, Plus, Trash } from "lucide-react";
 
 import { DataTable, DataTableHeaderWithSorting } from "@/components/DataTable";
 import { Badge } from "@/components/ui/badge";
@@ -128,7 +128,11 @@ const UserTable = ({
             <DropdownMenuContent align="end">
               <DropdownMenuLabel>Actions</DropdownMenuLabel>
               <DropdownMenuSeparator />
-              <DropdownMenuItem onClick={() => handleDeleteUser(user.id)}>
+              <DropdownMenuItem
+                onClick={() => handleDeleteUser(user.id)}
+                variant="destructive"
+              >
+                <Trash className="h-4 w-4" />
                 Delete user
               </DropdownMenuItem>
             </DropdownMenuContent>
