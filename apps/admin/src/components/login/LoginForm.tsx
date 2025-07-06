@@ -12,7 +12,7 @@ import {
   FormMessage,
 } from "@/components/ui/form";
 import { Input } from "@/components/ui/input";
-import { useLogin } from "@/hooks/useAuth";
+import { useLogin } from "@/hooks/useLogin";
 
 const loginSchema = z.object({
   email: z
