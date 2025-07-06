@@ -53,6 +53,9 @@ export class UsersService {
       where: { id },
       relations: {
         restaurant: true,
+        polarCustomer: {
+          subscriptions: true,
+        },
       },
     });
 

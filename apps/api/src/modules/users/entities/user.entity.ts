@@ -9,6 +9,7 @@ import {
 } from 'typeorm';
 
 import { Restaurant } from '@/modules/restaurants/entities/restaurant.entity';
+import { PolarCustomer } from '@/modules/subscriptions/entities/polar-customer.entity';
 
 @Entity()
 export class User {
@@ -42,4 +43,7 @@ export class User {
 
   @OneToOne(() => Restaurant, (restaurant) => restaurant.user)
   restaurant?: Restaurant;
+
+  @OneToOne(() => PolarCustomer, (polarCustomer) => polarCustomer.user)
+  polarCustomer?: PolarCustomer;
 }

@@ -86,16 +86,6 @@ const LoginModule = () => {
           onBlur={() => setErrorsForm((prev) => ({ ...prev, password: "" }))}
         />
 
-        <div className="w-full flex flex-row justify-between">
-          <div className="flex flex-row items-center gap-2">
-            <input type="checkbox" id="scales" name="scales" />
-            <p className="text-black text-sm">Remember me</p>
-          </div>
-          <button role="button" className="text-black text-sm ">
-            forgot your password?
-          </button>
-        </div>
-
         <span role="button" className="py-[8px] text-gray-400">
           Don't have an account?
           <span

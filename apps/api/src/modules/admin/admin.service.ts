@@ -2,11 +2,11 @@ import { Injectable } from '@nestjs/common';
 import { InjectDataSource } from '@nestjs/typeorm';
 import { DataSource } from 'typeorm';
 
+import { AuthService } from '@/modules/auth/auth.service';
 import { RestaurantsService } from '@/modules/restaurants/restaurants.service';
 import { UsersService } from '@/modules/users/users.service';
 
-import { RegisterRestaurantDto } from './dto/register-restaurant.dto';
-import { UpdateRestaurantDto } from './dto/update-restaurant.dto';
+import { RegisterRestaurantDto, UpdateRestaurantDto } from './dto';
 
 @Injectable()
 export class AdminService {
@@ -15,34 +15,11 @@ export class AdminService {
     private dataSource: DataSource,
     private usersService: UsersService,
     private restaurantsService: RestaurantsService,
+    private authService: AuthService,
   ) {}
 
   async registerRestaurant(registerRestaurantDto: RegisterRestaurantDto) {
-    const { companyName, companyPhone, ...userDto } = registerRestaurantDto;
-
-    const userAndRestaurant = await this.dataSource.transaction(
-      async (entityManager) => {
-        const user = await this.usersService.create(userDto, entityManager);
-
-        const restaurant = await this.restaurantsService.create(
-          {
-            name: companyName,
-            phone: companyPhone,
-            userId: user.id,
-          },
-          entityManager,
-        );
-
-        return {
-          user: {
-            ...user,
-            restaurant,
-          },
-        };
-      },
-    );
-
-    return userAndRestaurant;
+    return this.authService.register(registerRestaurantDto);
   }
 
   async findAllRestaurants() {

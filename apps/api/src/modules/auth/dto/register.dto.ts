@@ -1,7 +1,9 @@
 import { ApiProperty } from '@nestjs/swagger';
+import { Transform } from 'class-transformer';
 import {
   IsEmail,
   IsNotEmpty,
+  IsOptional,
   IsString,
   MaxLength,
   MinLength,
@@ -43,4 +45,27 @@ export class RegisterDto {
   @IsString()
   @MinLength(8)
   password: string;
+
+  @ApiProperty({
+    description: 'The name of the restaurant',
+    example: 'The Italian Corner',
+    maxLength: 50,
+    required: false,
+  })
+  @IsOptional()
+  @IsNotEmpty()
+  @IsString()
+  @MaxLength(50)
+  companyName?: string;
+
+  @ApiProperty({
+    description: 'The phone number of the restaurant',
+    example: '+1234567890',
+    required: false,
+  })
+  @IsOptional()
+  @IsNotEmpty()
+  @IsString()
+  @Transform(({ value }: { value: string }) => value.replace(/[^0-9]/g, ''))
+  companyPhone?: string;
 }

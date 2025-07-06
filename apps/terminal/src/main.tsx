@@ -12,6 +12,8 @@ import Register from "./pages/register.tsx";
 import { Toaster } from "sonner";
 import RequestNumber from "./pages/requestNumber.tsx";
 import SuccessVerify from "./pages/successVerify.tsx";
+import Subscription from "./pages/subcription.tsx";
+import SubscriptionSuccess from "./pages/subscriptionSuccess.tsx";
 
 createRoot(document.getElementById("root")!).render(
   <Provider store={store}>
@@ -27,6 +29,8 @@ createRoot(document.getElementById("root")!).render(
         <Route path="/register" element={<Register />} />
         <Route path="/requestNumber" element={<RequestNumber />} />
         <Route path="/successVerify" element={<SuccessVerify />} />
+        <Route path="/subscription" element={<Subscription />} />
+        <Route path="/checkout-success" element={<SubscriptionSuccess />} />
       </Routes>
     </BrowserRouter>
   </Provider>

@@ -58,13 +58,9 @@ const useUser = () => {
 
   const handleRegister = async (dataUser: ICreateUser): Promise<boolean> => {
     try {
-      const { data } = await axios.post(`${baseUrl}/auth/register`, dataUser);
-      if (data.ok) {
-        navigate("/login");
-        return true;
-      } else {
-        return false;
-      }
+      await axios.post(`${baseUrl}/api/auth/register`, dataUser);
+      navigate("/login");
+      return true;
     } catch (error: any) {
       toast.error(error.response.data.message);
       return false;
@@ -73,7 +69,7 @@ const useUser = () => {
 
   const handleLogin = async (dataLogin: ILogin) => {
     try {
-      const { data } = await axios.post(`${baseUrl}/auth/login`, dataLogin);
+      const { data } = await axios.post(`${baseUrl}/api/auth/login`, dataLogin);
 
       if (data.access_token) {
         Dispatch(onLoadUser(data.access_token));
@@ -86,13 +82,11 @@ const useUser = () => {
 
   const getItemByToken = async (token: string) => {
     try {
-      const { data } = await axios.get(`${baseUrl}/auth/profile`, {
+      const { data } = await axios.get(`${baseUrl}/api/auth/profile`, {
         headers: { Authorization: "Bearer " + token },
       });
 
-      if (data.ok) {
-        Dispatch(onLoadUserInfo(data.user));
-      }
+      Dispatch(onLoadUserInfo(data));
     } catch (error: any) {
       localStorage.removeItem("token");
       navigate("/login");

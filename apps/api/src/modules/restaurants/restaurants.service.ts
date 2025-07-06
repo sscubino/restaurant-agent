@@ -25,8 +25,11 @@ export class RestaurantsService {
 
     const restaurantRepository = this.getRestaurantRepository(entityManager);
 
+    const phone = createRestaurantDto.phone.replace(/[^0-9]/g, '');
+
     const restaurant = restaurantRepository.create({
       ...createRestaurantDto,
+      phone,
       user: {
         id: createRestaurantDto.userId,
       },

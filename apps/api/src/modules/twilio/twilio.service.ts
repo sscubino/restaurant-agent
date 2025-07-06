@@ -4,7 +4,8 @@ import {
   InternalServerErrorException,
 } from '@nestjs/common';
 import { ConfigService } from '@nestjs/config';
-import * as twilio from 'twilio';
+import { Twilio } from 'twilio';
+import VoiceResponse from 'twilio/lib/twiml/VoiceResponse';
 
 import { RestaurantTwilioCallsService } from '@/modules/restaurants/services/restaurant-twilio-calls.service';
 
@@ -13,7 +14,7 @@ import { TwilioVoiceWebhookDto } from './dto/twilio-incoming-call.dto';
 
 @Injectable()
 export class TwilioService {
-  private readonly twilioClient: twilio.Twilio;
+  private readonly twilioClient: Twilio;
   private readonly INCOMING_CALL_WEBHOOK: string;
   private readonly END_CALL_WEBHOOK: string;
 
@@ -25,7 +26,7 @@ export class TwilioService {
     const authToken = configService.getOrThrow<string>('TWILIO_AUTH_TOKEN');
     const base_url = configService.getOrThrow<string>('HOST_BASE_URL');
 
-    this.twilioClient = twilio(accountSid, authToken);
+    this.twilioClient = new Twilio(accountSid, authToken);
     this.INCOMING_CALL_WEBHOOK = `${base_url}/api/twilio/incoming-call`;
     this.END_CALL_WEBHOOK = `${base_url}/api/twilio/call-status-change`;
   }
@@ -39,14 +40,14 @@ export class TwilioService {
       body.To,
     );
 
-    const twiml = new twilio.twiml.VoiceResponse();
+    const response = new VoiceResponse();
 
     if (say) {
-      twiml.say(say.attributes, say.message);
+      response.say(say.attributes, say.message);
     }
 
     if (websocket) {
-      const stream = twiml.connect().stream({
+      const stream = response.connect().stream({
         url: websocket.url,
       });
       websocket.params?.forEach((param) => {
@@ -54,9 +55,9 @@ export class TwilioService {
       });
     }
 
-    console.log('twiml', twiml.toString());
+    console.log('twiml', response.toString());
 
-    return twiml;
+    return response;
   }
 
   async makeCall(from: string, to: string) {

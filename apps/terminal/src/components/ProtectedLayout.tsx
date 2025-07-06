@@ -1,13 +1,12 @@
 import { useEffect, useState } from "react";
-import { useNavigate, useLocation } from "react-router-dom";
+import { useNavigate } from "react-router-dom";
 import useUser from "../hooks/useUser";
 import { getItemStorage } from "../utils/storage";
 import SideBar from "./SideBar";
 
 const ProtectedLayout = ({ children }: any) => {
   const navigate = useNavigate();
-  const location = useLocation();
-  const { getItemByToken } = useUser();
+  const { getItemByToken, user } = useUser();
   const [isAuthenticated, setIsAuthenticated] = useState(false);
 
   useEffect(() => {
@@ -23,11 +22,32 @@ const ProtectedLayout = ({ children }: any) => {
     checkAuth();
   }, []);
 
+  useEffect(() => {
+    if (!user) return;
+    const subscriptions = user.polarCustomer?.subscriptions || [];
+
+    let hasActiveSubscription = false;
+    const now = new Date();
+    hasActiveSubscription = Boolean(
+      subscriptions.find(
+        (subscription: any) =>
+          subscription.status === "active" &&
+          new Date(subscription.currentPeriodEnd) > now
+      )
+    );
+
+    if (!hasActiveSubscription && location.pathname !== "/subscription") {
+      navigate("/subscription");
+    } else if (hasActiveSubscription && location.pathname === "/subscription") {
+      navigate("/");
+    }
+  }, [user, navigate]);
+
   if (!isAuthenticated) return null;
 
   return (
     <div className="flex h-full">
-      {location.pathname !== "/login" && <SideBar />}
+      <SideBar />
       <div className="flex-1 w-full h-full p-4 overflow-y-scroll">
         {children}
       </div>

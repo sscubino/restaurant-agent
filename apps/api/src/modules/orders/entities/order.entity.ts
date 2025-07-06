@@ -53,7 +53,7 @@ export class Order {
   @Column({ type: 'varchar', length: 50, nullable: true })
   table: string;
 
-  @Column({ type: 'timestamp', nullable: true })
+  @Column({ type: 'timestamptz', nullable: true })
   date: Date;
 
   @Column({ name: 'restaurant_id' })

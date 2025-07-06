@@ -11,7 +11,7 @@ import {
 
 import { Restaurant } from '@/modules/restaurants/entities/restaurant.entity';
 
-@Entity({ name: 'tables' })
+@Entity({ name: 'table' })
 export class Table {
   @PrimaryGeneratedColumn('uuid')
   id: string;

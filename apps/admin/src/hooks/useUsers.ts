@@ -11,15 +11,13 @@ import {
 // Query keys
 export const userKeys = {
   all: ["users"] as const,
-  lists: () => [...userKeys.all, "list"] as const,
-  details: () => [...userKeys.all, "detail"] as const,
-  detail: (id: string) => [...userKeys.details(), id] as const,
+  list: () => [...userKeys.all, "list"] as const,
 };
 
 // Get users query
 export const useUsers = () => {
   return useQuery({
-    queryKey: userKeys.lists(),
+    queryKey: userKeys.list(),
     queryFn: getUsers,
   });
 };
@@ -31,7 +29,7 @@ export const useCreateUser = () => {
   return useMutation({
     mutationFn: (userData: CreateUserDto) => createUser(userData),
     onSuccess: () => {
-      queryClient.invalidateQueries({ queryKey: userKeys.lists() });
+      queryClient.invalidateQueries({ queryKey: userKeys.list() });
       toast.success("User created successfully");
     },
     onError: (error: unknown) => {
@@ -48,7 +46,7 @@ export const useDeleteUser = () => {
   return useMutation({
     mutationFn: (id: string) => deleteUser(id),
     onSuccess: () => {
-      queryClient.invalidateQueries({ queryKey: userKeys.lists() });
+      queryClient.invalidateQueries({ queryKey: userKeys.list() });
       toast.success("User deleted successfully");
     },
     onError: (error: unknown) => {

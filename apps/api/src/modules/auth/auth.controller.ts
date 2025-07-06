@@ -1,4 +1,5 @@
 import {
+  BadRequestException,
   Body,
   ClassSerializerInterceptor,
   Controller,
@@ -7,7 +8,6 @@ import {
   HttpStatus,
   Post,
   Req,
-  UnauthorizedException,
   UseGuards,
   UseInterceptors,
 } from '@nestjs/common';
@@ -22,8 +22,7 @@ import {
 import type { Request } from 'express';
 
 import { AuthService } from './auth.service';
-import { LoginDto } from './dto/login.dto';
-import { RegisterDto } from './dto/register.dto';
+import { LoginDto, RegisterWithInviteCodeDto } from './dto';
 import { JwtAuthGuard } from './guards/jwt-auth.guard';
 
 @ApiTags('Auth')
@@ -50,16 +49,23 @@ export class AuthController {
 
   @Post('register')
   @ApiOperation({ summary: 'User registration' })
-  @ApiBody({ type: RegisterDto })
+  @ApiBody({ type: RegisterWithInviteCodeDto })
   @ApiResponse({
     status: 201,
     description: 'User registered successfully.',
   })
   @ApiResponse({ status: 400, description: 'Bad Request.' })
   @ApiResponse({ status: 401, description: 'Registration is disabled.' })
-  register(@Body() registerDto: RegisterDto) {
-    if (!this.configService.get<boolean>('IS_USER_REGISTRATION_ENABLED')) {
-      throw new UnauthorizedException('Registration is disabled');
+  register(@Body() registerDto: RegisterWithInviteCodeDto) {
+    if (registerDto.inviteCode) {
+      return this.authService.registerWithInviteCode(
+        registerDto,
+        registerDto.inviteCode,
+      );
+    }
+
+    if (this.configService.get('ARE_INVITE_CODES_REQUIRED_FOR_REGISTRATION')) {
+      throw new BadRequestException('Invite code is required');
     }
 
     return this.authService.register(registerDto);

@@ -1,27 +1,28 @@
 import * as React from "react";
 import Input from "../../components/InputField";
-import { useNavigate } from "react-router-dom";
+import { useNavigate, useSearchParams } from "react-router-dom";
 import useUser from "../../hooks/useUser";
 import { ICreateUser } from "../../hooks/types";
 import { ClipLoader } from "react-spinners";
 import { toast } from "sonner";
 
-const initialState = {
+const initialState = (inviteCode: string | null) => ({
   firstName: "",
   lastName: "",
   email: "",
   password: "",
-  phone: null,
-  Available_code: null,
-  company_name: "",
-};
+  companyName: "",
+  inviteCode: inviteCode ?? "",
+});
 
 const RegisterModule = () => {
   const navigate = useNavigate();
+  const [searchParams] = useSearchParams();
+  const inviteCode = searchParams.get("inviteCode");
   const { handleRegister } = useUser();
   const [loadingApi, setLoadingApi] = React.useState<boolean>(false);
 
-  const [data, setData] = React.useState<ICreateUser>(initialState);
+  const [data, setData] = React.useState<ICreateUser>(initialState(inviteCode));
   const [errors, setErrors] = React.useState<Record<string, string>>({});
 
   const token = localStorage.getItem("token");
@@ -40,15 +41,14 @@ const RegisterModule = () => {
   };
 
   const validateErrors = () => {
-    let errors: any = {};
+    const errors: { [key in keyof ICreateUser]?: string } = {};
     if (!data.email) errors.email = "Please enter a valid email";
     if (!data.firstName) errors.firstName = "Please enter a valid firstName";
     if (!data.lastName) errors.lastName = "Please enter a valid lastName";
     if (!data.password) errors.password = "Please enter a valid passsword";
-    if (!data.phone) errors.phone = "Please enter a valid phone";
-    if (!data.phone) errors.company_name = "Please enter a valid company name";
-    if (!data.phone_country_code)
-      errors.phone_country_code = "Please enter a valid phone country code";
+    if (!data.companyName)
+      errors.companyName = "Please enter a valid company name";
+    if (!inviteCode) errors.inviteCode = "Please enter a valid invite code";
 
     setErrors(errors);
     return errors;
@@ -56,12 +56,15 @@ const RegisterModule = () => {
 
   const register = async () => {
     try {
-      setLoadingApi(true);
-
       const errors = validateErrors();
 
       if (Object.keys(errors).length === 0) {
-        const isCreated = await handleRegister(data);
+        const payload = {
+          ...data,
+          invite_code: inviteCode ?? undefined,
+        };
+        setLoadingApi(true);
+        const isCreated = await handleRegister(payload);
         if (isCreated) {
           toast.success("Account created successfully!");
         } else {
@@ -69,6 +72,7 @@ const RegisterModule = () => {
         }
       }
     } catch (error) {
+      console.error("Error creating account", error);
     } finally {
       setLoadingApi(false);
     }
@@ -129,49 +133,28 @@ const RegisterModule = () => {
         <Input
           label="Company Name"
           type="text"
-          onChange={(value) => handleSetData("company_name", value)}
-          value={data.company_name}
+          onChange={(value) => handleSetData("companyName", value)}
+          value={data.companyName}
           placeholder="ej: McDonals"
           width="100%"
-          error={errors.company_name}
-          onFocus={() => setErrors((prev) => ({ ...prev, company_name: "" }))}
-          onBlur={() => setErrors((prev) => ({ ...prev, company_name: "" }))}
+          error={errors.companyName}
+          onFocus={() => setErrors((prev) => ({ ...prev, companyName: "" }))}
+          onBlur={() => setErrors((prev) => ({ ...prev, companyName: "" }))}
         />
 
-        <div className="w-full flex flex-col items-start">
-          <label className="block text-sm font-medium text-gray-700 mb-1">
-            Twilio Phone Number
-          </label>
-
-          <div className="w-full flex flex-row items-center gap-4">
-            <Input
-              type="number"
-              onChange={(value) => handleSetData("phone", parseInt(value))}
-              value={data.phone ?? ""}
-              placeholder=""
-              width="100%"
-              onFocus={() =>
-                setErrors((prev) => ({
-                  ...prev,
-                  phone: "",
-                  phone_country_code: "",
-                }))
-              }
-              onBlur={() =>
-                setErrors((prev) => ({
-                  ...prev,
-                  phone: "",
-                  phone_country_code: "",
-                }))
-              }
-            />
-          </div>
-          {(errors.phone_country_code || errors.phone) && (
-            <p className="text-sm text-red-500 ">
-              Please enter a valid phone with your country code{" "}
-            </p>
-          )}
-        </div>
+        {!inviteCode && (
+          <Input
+            label="Invite Code"
+            type="text"
+            onChange={(value) => handleSetData("inviteCode", value)}
+            value={data.inviteCode ?? ""}
+            placeholder="ej: ABC123"
+            width="100%"
+            error={errors.inviteCode}
+            onFocus={() => setErrors((prev) => ({ ...prev, inviteCode: "" }))}
+            onBlur={() => setErrors((prev) => ({ ...prev, inviteCode: "" }))}
+          />
+        )}
 
         <span role="button" className="py-[8px] text-gray-400">
           Already have an account?
@@ -181,17 +164,6 @@ const RegisterModule = () => {
             className="ml-2 cursor-pointer text-gray-900 no-underline font-bold outline-none focus:ring-0 focus:outline-none"
           >
             Sign in
-          </span>
-        </span>
-
-        <span role="button" className="py-[0px] text-gray-400">
-          Don't have a Twilio number yet?
-          <span
-            role="button"
-            onClick={() => navigate("/requestNumber")}
-            className="ml-2 cursor-pointer text-gray-900 no-underline font-bold outline-none focus:ring-0 focus:outline-none"
-          >
-            Request one
           </span>
         </span>
 

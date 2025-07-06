@@ -1,12 +1,20 @@
-import { Injectable, UnauthorizedException } from '@nestjs/common';
+import {
+  BadRequestException,
+  Injectable,
+  UnauthorizedException,
+} from '@nestjs/common';
 import { JwtService } from '@nestjs/jwt';
+import { InjectDataSource } from '@nestjs/typeorm';
 import * as bcrypt from 'bcrypt';
+import { DataSource, EntityManager } from 'typeorm';
 
+import { InviteCodesService } from '@/modules/invite-codes/invite-codes.service';
+import { RestaurantsService } from '@/modules/restaurants/restaurants.service';
+import { SubscriptionsService } from '@/modules/subscriptions/subscriptions.service';
 import { User } from '@/modules/users/entities/user.entity';
 import { UsersService } from '@/modules/users/users.service';
 
-import { LoginDto } from './dto/login.dto';
-import { RegisterDto } from './dto/register.dto';
+import { LoginDto, RegisterDto, RegisterWithInviteCodeDto } from './dto';
 import { JwtPayload } from './strategies/jwt.strategy';
 
 export interface AuthResponse {
@@ -18,7 +26,12 @@ export interface AuthResponse {
 export class AuthService {
   constructor(
     private usersService: UsersService,
+    private restaurantsService: RestaurantsService,
     private jwtService: JwtService,
+    private inviteCodesService: InviteCodesService,
+    private subscriptionsService: SubscriptionsService,
+    @InjectDataSource()
+    private readonly dataSource: DataSource,
   ) {}
 
   async validateUser(email: string, password: string) {
@@ -37,27 +50,100 @@ export class AuthService {
 
     await this.usersService.updateLastLogin(user.id);
 
-    return this.getAuthResponse(user);
+    return this.getAuthResponsePayload(user);
   }
 
-  async register(registerDto: RegisterDto): Promise<AuthResponse> {
-    const user = await this.usersService.create({
-      ...registerDto,
-      isSuperUser: false,
+  async registerWithInviteCode(
+    registerDto: RegisterWithInviteCodeDto,
+    inviteCode: string,
+  ): Promise<AuthResponse> {
+    const validInviteCode = await this.validateInviteCode(inviteCode);
+    registerDto.companyPhone =
+      validInviteCode.twilioPhoneNumber ?? registerDto.companyPhone;
+    return this.register(registerDto, inviteCode);
+  }
+
+  async register(
+    registerDto: RegisterDto,
+    inviteCode?: string,
+  ): Promise<AuthResponse> {
+    const user = await this.dataSource.transaction(async (entityManager) => {
+      const user = await this.createUser(registerDto, entityManager);
+
+      const restaurant = await this.createRestaurant(
+        registerDto,
+        user,
+        entityManager,
+      );
+
+      if (inviteCode) {
+        await this.inviteCodesService.claimCode(
+          inviteCode,
+          user.id,
+          entityManager,
+        );
+      }
+
+      return { ...user, restaurant };
     });
 
-    return this.getAuthResponse(user);
-  }
+    this.subscriptionsService.createPolarCustomer(user).catch((error) => {
+      console.error(`Failed to create customer in Polar: ${error}`);
+    });
 
+    return this.getAuthResponsePayload(user);
+  }
   async getProfile(userId: string): Promise<User> {
     return this.usersService.findOne(userId);
   }
 
-  private getAuthResponse(user: User): AuthResponse {
+  private getAuthResponsePayload(user: User): AuthResponse {
     const payload: JwtPayload = { email: user.email, sub: user.id };
     return {
       access_token: this.jwtService.sign(payload),
       user,
     };
+  }
+
+  private async validateInviteCode(inviteCode: string) {
+    const invite = await this.inviteCodesService.findByCode(inviteCode);
+
+    if (invite.isUsed) {
+      throw new BadRequestException('Invite code has already been used');
+    }
+
+    return invite;
+  }
+
+  private async createUser(
+    registerDto: RegisterDto,
+    entityManager: EntityManager,
+  ) {
+    return this.usersService.create(
+      {
+        ...registerDto,
+        isSuperUser: false,
+      },
+      entityManager,
+    );
+  }
+
+  private async createRestaurant(
+    registerDto: RegisterDto,
+    user: User,
+    entityManager: EntityManager,
+  ) {
+    if (!registerDto.companyName) {
+      return undefined;
+    }
+
+    return this.restaurantsService.create(
+      {
+        name: registerDto.companyName,
+        phone: registerDto.companyPhone ?? '',
+        userId: user.id,
+      },
+      entityManager,
+    );
   }
 }

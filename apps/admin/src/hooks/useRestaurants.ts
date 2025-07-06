@@ -7,16 +7,13 @@ import { deleteRestaurant, getRestaurants } from "@/services/api/restaurants";
 // Query keys
 export const restaurantKeys = {
   all: ["restaurants"] as const,
-  lists: () => [...restaurantKeys.all, "list"] as const,
-  list: (filters: string) => [...restaurantKeys.lists(), { filters }] as const,
-  details: () => [...restaurantKeys.all, "detail"] as const,
-  detail: (id: string) => [...restaurantKeys.details(), id] as const,
+  list: () => [...restaurantKeys.all, "list"] as const,
 };
 
 // Get restaurants query
 export const useRestaurants = () => {
   return useQuery({
-    queryKey: restaurantKeys.lists(),
+    queryKey: restaurantKeys.list(),
     queryFn: getRestaurants,
   });
 };
@@ -28,7 +25,7 @@ export const useCreateRestaurant = () => {
   return useMutation({
     mutationFn: (userData: RegisterUserData) => register(userData),
     onSuccess: () => {
-      queryClient.invalidateQueries({ queryKey: restaurantKeys.lists() });
+      queryClient.invalidateQueries({ queryKey: restaurantKeys.list() });
       toast.success("Restaurant created successfully");
     },
     onError: (error: unknown) => {
@@ -45,7 +42,7 @@ export const useDeleteRestaurant = () => {
   return useMutation({
     mutationFn: (id: string) => deleteRestaurant(id),
     onSuccess: () => {
-      queryClient.invalidateQueries({ queryKey: restaurantKeys.lists() });
+      queryClient.invalidateQueries({ queryKey: restaurantKeys.list() });
       toast.success("Restaurant deleted successfully");
     },
     onError: (error: unknown) => {

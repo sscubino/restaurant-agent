@@ -1,4 +1,4 @@
-import { HomeIcon, LayoutDashboard, LogOut } from "lucide-react";
+import { HomeIcon, KeyRound, LayoutDashboard, LogOut } from "lucide-react";
 import { StoreIcon, UsersIcon } from "lucide-react";
 import { Link, useLocation } from "react-router";
 
@@ -22,6 +22,11 @@ const items = [
     title: "Dashboard",
     href: RoutePaths.HOME,
     icon: <HomeIcon />,
+  },
+  {
+    title: "Invites",
+    href: RoutePaths.INVITES,
+    icon: <KeyRound />,
   },
   {
     title: "Restaurants",
