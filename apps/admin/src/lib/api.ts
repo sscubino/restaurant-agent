@@ -1,5 +1,6 @@
 import axios from "axios";
 
+import { RoutePaths } from "@/config/types";
 import { getToken, removeToken } from "@/lib/auth-storage";
 
 const API_URL = import.meta.env.VITE_API_URL;
@@ -17,14 +18,12 @@ api.interceptors.request.use((config) => {
 });
 
 api.interceptors.response.use(
-  (response) => {
-    return response;
-  },
+  (response) => response,
   (error) => {
     if (error?.response?.status === 401) {
       removeToken();
-      if (window.location.pathname !== "/login") {
-        window.location.href = "/login";
+      if (window.location.pathname !== RoutePaths.LOGIN) {
+        window.location.href = RoutePaths.LOGIN;
       }
     }
     return Promise.reject(error);

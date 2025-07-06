@@ -15,9 +15,16 @@ import {
   SidebarMenuItem,
 } from "@/components/ui/sidebar";
 import { RoutePaths } from "@/config/types";
+import { useProfile } from "@/hooks/useProfile";
 import { cn } from "@/lib/utils";
 
-const items = [
+interface NavigationLinkProps {
+  href: string;
+  title: string;
+  icon: React.ReactNode;
+}
+
+const items: NavigationLinkProps[] = [
   {
     title: "Dashboard",
     href: RoutePaths.HOME,
@@ -45,26 +52,12 @@ interface SidebarProps {
 }
 
 export function DashboardSidebar({ handleLogout }: SidebarProps) {
-  const location = useLocation();
-
-  const isActive = (href: string) => {
-    return location.pathname === href;
-  };
-
   return (
     <Sidebar collapsible="icon" variant="inset">
       <SidebarHeader>
         <SidebarMenu>
           <SidebarMenuItem>
-            <SidebarMenuButton
-              asChild
-              className="data-[slot=sidebar-menu-button]:!p-1.5"
-            >
-              <Link to={RoutePaths.HOME} className="h-(--header-height) my-1">
-                <LayoutDashboard className="!size-5" />
-                <span className="text-xl font-semibold">Admin Panel</span>
-              </Link>
-            </SidebarMenuButton>
+            <SidebarHeaderButton />
           </SidebarMenuItem>
         </SidebarMenu>
       </SidebarHeader>
@@ -75,19 +68,11 @@ export function DashboardSidebar({ handleLogout }: SidebarProps) {
             <SidebarMenu>
               {items.map((item) => (
                 <SidebarMenuItem key={item.title}>
-                  <SidebarMenuButton asChild>
-                    <Link
-                      to={item.href}
-                      className={cn(
-                        "w-full justify-start",
-                        isActive(item.href) &&
-                          "bg-accent text-accent-foreground"
-                      )}
-                    >
-                      {item.icon}
-                      {item.title}
-                    </Link>
-                  </SidebarMenuButton>
+                  <NavigationLink
+                    href={item.href}
+                    title={item.title}
+                    icon={item.icon}
+                  />
                 </SidebarMenuItem>
               ))}
             </SidebarMenu>
@@ -96,6 +81,7 @@ export function DashboardSidebar({ handleLogout }: SidebarProps) {
       </SidebarContent>
       <SidebarFooter>
         <SidebarMenu className="mt-auto">
+          <LoggedInUserInfo />
           <SidebarMenuItem>
             <SidebarMenuButton
               onClick={handleLogout}
@@ -108,5 +94,55 @@ export function DashboardSidebar({ handleLogout }: SidebarProps) {
         </SidebarMenu>
       </SidebarFooter>
     </Sidebar>
+  );
+}
+
+function SidebarHeaderButton() {
+  return (
+    <SidebarMenuButton
+      asChild
+      className="data-[slot=sidebar-menu-button]:!p-1.5"
+    >
+      <Link to={RoutePaths.HOME} className="h-(--header-height) my-1">
+        <LayoutDashboard className="!size-5" />
+        <span className="text-xl font-semibold">Admin Panel</span>
+      </Link>
+    </SidebarMenuButton>
+  );
+}
+
+function NavigationLink({ href, title, icon }: NavigationLinkProps) {
+  const location = useLocation();
+  const isActive = (href: string) => {
+    return location.pathname === href;
+  };
+
+  return (
+    <SidebarMenuButton asChild>
+      <Link
+        to={href}
+        className={cn(
+          "w-full justify-start",
+          isActive(href) && "bg-accent text-accent-foreground"
+        )}
+      >
+        {icon}
+        {title}
+      </Link>
+    </SidebarMenuButton>
+  );
+}
+
+function LoggedInUserInfo() {
+  const { data: profile } = useProfile();
+  return (
+    <>
+      <span className="text-md text-muted-foreground">
+        {profile?.firstName} {profile?.lastName}
+      </span>
+      <span className="text-sm text-muted-foreground/60 mb-2 text-ellipsis overflow-hidden">
+        {profile?.email}
+      </span>
+    </>
   );
 }

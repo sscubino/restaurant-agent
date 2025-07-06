@@ -9,6 +9,25 @@ export interface User {
   isSuperUser: boolean;
   lastLogin: string | null;
   restaurant?: Omit<Restaurant, "user">;
+  polarCustomer?: PolarCustomer;
+  createdAt: string;
+  updatedAt: string;
+}
+
+export interface PolarCustomer {
+  id: string;
+  subscriptions: PolarSubscription[];
+  createdAt: string;
+  updatedAt: string;
+}
+
+export interface PolarSubscription {
+  id: string;
+  status: string;
+  currentPeriodStart: string;
+  currentPeriodEnd: string | null;
+  canceledAt: string | null;
+  cancelAtPeriodEnd: boolean;
   createdAt: string;
   updatedAt: string;
 }
