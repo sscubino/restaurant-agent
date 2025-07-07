@@ -1,4 +1,4 @@
-import axios from "axios";
+import axios, { AxiosError } from "axios";
 import { useDispatch, useSelector } from "react-redux";
 import {
   onLoadUser,
@@ -93,6 +93,19 @@ const useUser = () => {
     }
   };
 
+  const resendVerificationEmail = async () => {
+    try {
+      await axios.post(`${baseUrl}/api/auth/resend-verification-email`);
+      toast.success("Verification email resent.");
+    } catch (error) {
+      if (error instanceof AxiosError) {
+        toast.error(error.response?.data.message);
+      } else {
+        toast.error("Something went wrong.");
+      }
+    }
+  };
+
   return {
     user,
     loadingApi,
@@ -101,6 +114,7 @@ const useUser = () => {
     handleRegister,
     handleVerifyCode,
     sendVerifyCode,
+    resendVerificationEmail,
     loading,
   };
 };

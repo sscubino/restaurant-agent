@@ -32,6 +32,9 @@ export class User {
   @Column({ name: 'is_super_user', default: false })
   isSuperUser: boolean;
 
+  @Column({ name: 'is_verified', default: false })
+  isVerified: boolean;
+
   @Column({ name: 'last_login', nullable: true })
   lastLogin: Date;
 

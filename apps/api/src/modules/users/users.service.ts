@@ -2,6 +2,7 @@ import {
   ConflictException,
   Injectable,
   NotFoundException,
+  UnauthorizedException,
 } from '@nestjs/common';
 import { ConfigService } from '@nestjs/config';
 import { InjectRepository } from '@nestjs/typeorm';
@@ -146,5 +147,15 @@ export class UsersService {
     if (!user) {
       console.log(`Super user created ${email}`);
     }
+  }
+
+  async verifyEmail(userId: string, email: string) {
+    const user = await this.findOne(userId);
+    if (user.email !== email) {
+      throw new UnauthorizedException(
+        'User email does not match the verification email',
+      );
+    }
+    await this.usersRepository.update(userId, { isVerified: true });
   }
 }

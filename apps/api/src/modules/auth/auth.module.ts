@@ -4,6 +4,7 @@ import { JwtModule } from '@nestjs/jwt';
 import { PassportModule } from '@nestjs/passport';
 
 import { InviteCodesModule } from '@/modules/invite-codes/invite-codes.module';
+import { ResendModule } from '@/modules/resend/resend.module';
 import { RestaurantsModule } from '@/modules/restaurants/restaurants.module';
 import { SubscriptionsModule } from '@/modules/subscriptions/subscriptions.module';
 import { UsersModule } from '@/modules/users/users.module';
@@ -20,6 +21,7 @@ import { JwtStrategy } from './strategies/jwt.strategy';
     RestaurantsModule,
     InviteCodesModule,
     SubscriptionsModule,
+    ResendModule,
     PassportModule,
     JwtModule.registerAsync({
       imports: [ConfigModule],

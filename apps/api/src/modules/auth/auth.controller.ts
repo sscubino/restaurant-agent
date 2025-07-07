@@ -7,7 +7,9 @@ import {
   HttpCode,
   HttpStatus,
   Post,
+  Query,
   Req,
+  Res,
   UseGuards,
   UseInterceptors,
 } from '@nestjs/common';
@@ -19,7 +21,7 @@ import {
   ApiResponse,
   ApiTags,
 } from '@nestjs/swagger';
-import type { Request } from 'express';
+import type { Request, Response } from 'express';
 
 import { AuthService } from './auth.service';
 import { LoginDto, RegisterWithInviteCodeDto } from './dto';
@@ -82,5 +84,42 @@ export class AuthController {
   @UseGuards(JwtAuthGuard)
   getProfile(@Req() req: Request) {
     return this.authService.getProfile(req.user!.id);
+  }
+
+  @Get('verify-email')
+  @ApiOperation({ summary: 'Verify email' })
+  @ApiResponse({ status: 200, description: 'Email verified successfully.' })
+  @ApiResponse({
+    status: 401,
+    description: 'Invalid email verification token.',
+  })
+  async verifyEmail(@Query('token') token: string, @Res() res: Response) {
+    const frontendUrl = this.configService.getOrThrow<string>('FRONTEND_URL');
+    try {
+      await this.authService.verifyEmail(token);
+    } catch {
+      return res.redirect(frontendUrl + '/errorVerify');
+    }
+    return res.redirect(frontendUrl + '/successVerify');
+  }
+
+  @Get('resend-verification-email')
+  @ApiOperation({ summary: 'Resend verification email' })
+  @ApiResponse({ status: 200, description: 'Verification email resent.' })
+  @ApiResponse({
+    status: 400,
+    description: 'User is already verified.',
+  })
+  @ApiResponse({
+    status: 401,
+    description: 'Unauthorized.',
+  })
+  @ApiBearerAuth('JWT-auth')
+  @UseGuards(JwtAuthGuard)
+  resendVerificationEmail(@Req() req: Request) {
+    if (req.user!.isVerified) {
+      throw new BadRequestException('User is already verified');
+    }
+    return this.authService.sendVerificationEmail(req.user!);
   }
 }

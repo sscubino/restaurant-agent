@@ -27,14 +27,16 @@ export class OrderDetail {
   @Column({ name: 'menu_item_id' })
   menuItemId: string;
 
-  @ManyToOne(() => MenuItem)
+  @ManyToOne(() => MenuItem, { onDelete: 'SET NULL' })
   @JoinColumn({ name: 'menu_item_id' })
   menuItem: MenuItem;
 
   @Column({ name: 'order_id' })
   orderId: string;
 
-  @ManyToOne(() => Order, (order) => order.orderDetails)
+  @ManyToOne(() => Order, (order) => order.orderDetails, {
+    onDelete: 'CASCADE',
+  })
   @JoinColumn({ name: 'order_id' })
   order: Order;
 }

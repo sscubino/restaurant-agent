@@ -146,6 +146,7 @@ const UserDialog = ({ isOpen, setIsOpen }: UserDialogProps) => {
                       <Input
                         type="password"
                         placeholder="Enter password"
+                        autoComplete="new-password"
                         {...field}
                       />
                     </FormControl>

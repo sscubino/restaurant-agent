@@ -36,12 +36,16 @@ const ProtectedLayout = ({ children }: any) => {
       )
     );
 
-    if (!hasActiveSubscription && location.pathname !== "/subscription") {
+    if (
+      !hasActiveSubscription &&
+      isAuthenticated &&
+      location.pathname !== "/subscription"
+    ) {
       navigate("/subscription");
     } else if (hasActiveSubscription && location.pathname === "/subscription") {
       navigate("/");
     }
-  }, [user, navigate]);
+  }, [user, navigate, isAuthenticated]);
 
   if (!isAuthenticated) return null;
 

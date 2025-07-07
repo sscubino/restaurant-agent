@@ -3,12 +3,14 @@ import {
   Injectable,
   UnauthorizedException,
 } from '@nestjs/common';
+import { ConfigService } from '@nestjs/config';
 import { JwtService } from '@nestjs/jwt';
 import { InjectDataSource } from '@nestjs/typeorm';
 import * as bcrypt from 'bcrypt';
 import { DataSource, EntityManager } from 'typeorm';
 
 import { InviteCodesService } from '@/modules/invite-codes/invite-codes.service';
+import { ResendService } from '@/modules/resend/resend.service';
 import { RestaurantsService } from '@/modules/restaurants/restaurants.service';
 import { SubscriptionsService } from '@/modules/subscriptions/subscriptions.service';
 import { User } from '@/modules/users/entities/user.entity';
@@ -22,6 +24,11 @@ export interface AuthResponse {
   user: User;
 }
 
+interface EmailVerificationPayload {
+  verify: string;
+  for: string;
+}
+
 @Injectable()
 export class AuthService {
   constructor(
@@ -30,6 +37,8 @@ export class AuthService {
     private jwtService: JwtService,
     private inviteCodesService: InviteCodesService,
     private subscriptionsService: SubscriptionsService,
+    private resendService: ResendService,
+    private configService: ConfigService,
     @InjectDataSource()
     private readonly dataSource: DataSource,
   ) {}
@@ -91,10 +100,30 @@ export class AuthService {
       console.error(`Failed to create customer in Polar: ${error}`);
     });
 
+    void this.sendVerificationEmail(user);
+
     return this.getAuthResponsePayload(user);
   }
+
   async getProfile(userId: string): Promise<User> {
     return this.usersService.findOne(userId);
+  }
+
+  async sendVerificationEmail(user: User) {
+    const payload: EmailVerificationPayload = {
+      verify: user.email,
+      for: user.id,
+    };
+    const token = this.jwtService.sign(payload, { expiresIn: '2h' });
+    await this.resendService.sendVerificationEmail(
+      user.email,
+      `${this.configService.getOrThrow<string>('HOST_BASE_URL')}/api/auth/verify-email?token=${token}`,
+    );
+  }
+
+  async verifyEmail(token: string) {
+    const payload = this.jwtService.verify<EmailVerificationPayload>(token);
+    await this.usersService.verifyEmail(payload.for, payload.verify);
   }
 
   private getAuthResponsePayload(user: User): AuthResponse {

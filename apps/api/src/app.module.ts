@@ -10,6 +10,7 @@ import { InviteCodesModule } from '@/modules/invite-codes/invite-codes.module';
 import { MenusModule } from '@/modules/menus/menus.module';
 import { OrdersModule } from '@/modules/orders/orders.module';
 import { PhoneCallsModule } from '@/modules/phone-calls/phone-calls.module';
+import { ResendModule } from '@/modules/resend/resend.module';
 import { RestaurantsModule } from '@/modules/restaurants/restaurants.module';
 import { SubscriptionsModule } from '@/modules/subscriptions/subscriptions.module';
 import { TablesModule } from '@/modules/tables/tables.module';
@@ -39,6 +40,7 @@ import { UsersModule } from '@/modules/users/users.module';
     AdminModule,
     SubscriptionsModule,
     InviteCodesModule,
+    ResendModule,
   ],
 })
 export class AppModule {}

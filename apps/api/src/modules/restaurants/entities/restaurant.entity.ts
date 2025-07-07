@@ -9,6 +9,7 @@ import {
   UpdateDateColumn,
 } from 'typeorm';
 
+import { MenuItem } from '@/modules/menus/entities/menu-item.entity';
 import { Order } from '@/modules/orders/entities/order.entity';
 import { PhoneCall } from '@/modules/phone-calls/entities/phone-call.entity';
 import { Table } from '@/modules/tables/entities/table.entity';
@@ -39,6 +40,9 @@ export class Restaurant {
 
   @OneToMany(() => Order, (order) => order.restaurant)
   orders: Order[];
+
+  @OneToMany(() => MenuItem, (menuItem) => menuItem.restaurant)
+  menuItems: MenuItem[];
 
   @OneToMany(() => Table, (table) => table.restaurant)
   tables: Table[];

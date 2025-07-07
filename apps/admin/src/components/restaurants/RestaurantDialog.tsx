@@ -144,6 +144,7 @@ const RestaurantDialog = ({ isOpen, setIsOpen }: RestaurantDialogProps) => {
                       <Input
                         type="password"
                         placeholder="Enter password"
+                        autoComplete="new-password"
                         {...field}
                       />
                     </FormControl>

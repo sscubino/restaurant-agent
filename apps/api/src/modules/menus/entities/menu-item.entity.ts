@@ -31,7 +31,9 @@ export class MenuItem {
   @Column({ name: 'restaurant_id' })
   restaurantId: string;
 
-  @ManyToOne(() => Restaurant)
+  @ManyToOne(() => Restaurant, (restaurant) => restaurant.menuItems, {
+    onDelete: 'CASCADE',
+  })
   @JoinColumn({ name: 'restaurant_id' })
   restaurant: Restaurant;
 

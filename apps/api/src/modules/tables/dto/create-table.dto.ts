@@ -1,4 +1,5 @@
 import { ApiProperty, ApiPropertyOptional } from '@nestjs/swagger';
+import { Transform } from 'class-transformer';
 import {
   IsBoolean,
   IsNotEmpty,
@@ -25,6 +26,7 @@ export class CreateTableDto {
     example: 4,
     minimum: 1,
   })
+  @Transform(({ value }) => Number(value))
   @IsNotEmpty()
   @IsNumber()
   @IsPositive()
