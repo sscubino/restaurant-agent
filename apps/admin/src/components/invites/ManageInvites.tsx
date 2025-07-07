@@ -1,4 +1,5 @@
-import { useState } from "react";
+import { useEffect, useState } from "react";
+import { useLocation } from "react-router";
 
 import DeleteInviteAlertDialog from "@/components/invites/DeleteInviteAlertDialog";
 import InviteDialog from "@/components/invites/InviteDialog";
@@ -9,8 +10,15 @@ export default function ManageInvites() {
   const [isInviteDialogOpen, setIsInviteDialogOpen] = useState(false);
   const [isDeleteDialogOpen, setIsDeleteDialogOpen] = useState(false);
   const [deletingInviteId, setDeletingInviteId] = useState<string | null>(null);
+  const location = useLocation();
 
   const { data: inviteCodes = [], isLoading } = useInviteCodes();
+
+  useEffect(() => {
+    if (location.state?.create) {
+      setIsInviteDialogOpen(true);
+    }
+  }, [location.state?.create]);
 
   const handleOpenCreateDialog = () => {
     setIsInviteDialogOpen(true);

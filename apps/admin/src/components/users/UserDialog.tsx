@@ -58,7 +58,7 @@ const UserDialog = ({ isOpen, setIsOpen }: UserDialogProps) => {
       password: "",
       isSuperUser: false,
     },
-    mode: "onBlur",
+    mode: "onSubmit",
   });
 
   const onSubmit = (data: UserFormData) => {

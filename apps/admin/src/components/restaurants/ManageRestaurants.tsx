@@ -1,4 +1,5 @@
-import { useState } from "react";
+import { useEffect, useState } from "react";
+import { useLocation } from "react-router";
 
 import DeleteRestaurantAlertDialog from "@/components/restaurants/DeleteRestaurantAlertDialog";
 import RestaurantDialog from "@/components/restaurants/RestaurantDialog";
@@ -11,8 +12,15 @@ export default function ManageRestaurants() {
   const [deletingRestaurantId, setDeletingRestaurantId] = useState<
     string | null
   >(null);
+  const location = useLocation();
 
   const { data: restaurants = [], isLoading } = useRestaurants();
+
+  useEffect(() => {
+    if (location.state?.create) {
+      setIsRestaurantDialogOpen(true);
+    }
+  }, [location.state?.create]);
 
   const handleOpenCreateDialog = () => {
     setIsRestaurantDialogOpen(true);

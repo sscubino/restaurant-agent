@@ -7,7 +7,7 @@ import {
   Moon,
   MoreVertical,
   Sun,
-  UserLock,
+  Terminal,
 } from "lucide-react";
 import { StoreIcon, UsersIcon } from "lucide-react";
 import { Link, useLocation } from "react-router";
@@ -121,7 +121,7 @@ function SidebarHeaderButton() {
       className="data-[slot=sidebar-menu-button]:!p-1.5"
     >
       <Link to={RoutePaths.HOME} className="h-(--header-height) my-1">
-        <UserLock className="!size-5" />
+        <Terminal className="!size-5" />
         <span className="text-xl font-semibold">Admin Panel</span>
       </Link>
     </SidebarMenuButton>

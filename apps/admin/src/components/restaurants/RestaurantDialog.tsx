@@ -63,7 +63,7 @@ const RestaurantDialog = ({ isOpen, setIsOpen }: RestaurantDialogProps) => {
       companyName: "",
       companyPhone: "",
     },
-    mode: "onBlur",
+    mode: "onSubmit",
   });
 
   const onSubmit = (data: RestaurantFormData) => {
