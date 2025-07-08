@@ -4,7 +4,8 @@ import {
   InternalServerErrorException,
 } from '@nestjs/common';
 import { ConfigService } from '@nestjs/config';
-import { Twilio } from 'twilio';
+import { Request } from 'express';
+import { Twilio, validateRequest } from 'twilio';
 import VoiceResponse from 'twilio/lib/twiml/VoiceResponse';
 
 import { RestaurantTwilioCallsService } from '@/modules/restaurants/services/restaurant-twilio-calls.service';
@@ -17,6 +18,7 @@ export class TwilioService {
   private readonly twilioClient: Twilio;
   private readonly INCOMING_CALL_WEBHOOK: string;
   private readonly END_CALL_WEBHOOK: string;
+  private readonly TWILIO_AUTH_TOKEN: string;
 
   constructor(
     private readonly configService: ConfigService,
@@ -29,6 +31,7 @@ export class TwilioService {
     this.twilioClient = new Twilio(accountSid, authToken);
     this.INCOMING_CALL_WEBHOOK = `${base_url}/api/twilio/incoming-call`;
     this.END_CALL_WEBHOOK = `${base_url}/api/twilio/call-status-change`;
+    this.TWILIO_AUTH_TOKEN = authToken;
   }
 
   async handleIncomingCall(body: TwilioVoiceWebhookDto) {
@@ -111,6 +114,16 @@ export class TwilioService {
         voiceUrl: this.INCOMING_CALL_WEBHOOK,
         statusCallback: this.END_CALL_WEBHOOK,
       });
+  }
+
+  validateRequest(req: Request) {
+    const signature = req.headers['x-twilio-signature'] as string;
+    return validateRequest(
+      this.TWILIO_AUTH_TOKEN,
+      signature,
+      `${this.configService.getOrThrow<string>('HOST_BASE_URL')}${req.url}`,
+      req.body as Record<string, unknown>,
+    );
   }
 
   // Phone number verification currently not used

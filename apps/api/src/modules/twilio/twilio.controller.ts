@@ -4,7 +4,9 @@ import {
   Get,
   Post,
   Query,
+  Req,
   Res,
+  UnauthorizedException,
   UseGuards,
 } from '@nestjs/common';
 import {
@@ -13,7 +15,7 @@ import {
   ApiResponse,
   ApiTags,
 } from '@nestjs/swagger';
-import { Response } from 'express';
+import { Request, Response } from 'express';
 
 import { JwtAuthGuard } from '@/modules/auth/guards/jwt-auth.guard';
 import { SuperUserGuard } from '@/modules/auth/guards/super-user.guard';
@@ -37,10 +39,19 @@ export class TwilioController {
     status: 200,
     description: 'Incoming call handled successfully',
   })
+  @ApiResponse({
+    status: 401,
+    description: 'Unauthorized - Invalid Twilio request',
+  })
   async handleIncomingCall(
+    @Req() req: Request,
     @Res() res: Response,
     @Body() body: TwilioVoiceWebhookDto,
   ) {
+    if (!this.twilioService.validateRequest(req)) {
+      throw new UnauthorizedException('Invalid Twilio request');
+    }
+
     console.log('=== Twilio Voice Webhook Called ===');
     console.log('Body:', {
       CallSid: body.CallSid,
@@ -64,7 +75,15 @@ export class TwilioController {
     status: 200,
     description: 'Call status change handled successfully',
   })
-  async finishCall(@Body() body: TwilioEndCallDto) {
+  @ApiResponse({
+    status: 401,
+    description: 'Unauthorized - Invalid Twilio request',
+  })
+  async finishCall(@Req() req: Request, @Body() body: TwilioEndCallDto) {
+    if (!this.twilioService.validateRequest(req)) {
+      throw new UnauthorizedException('Invalid Twilio request');
+    }
+
     console.log('=== Twilio End Call Called ===');
     console.log('Body:', {
       CallSid: body.CallSid,

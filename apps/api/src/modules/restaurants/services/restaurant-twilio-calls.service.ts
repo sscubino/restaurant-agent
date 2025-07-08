@@ -46,12 +46,8 @@ export class RestaurantTwilioCallsService {
   }
 
   async handleCallStatusChange(twilioEndCallDto: TwilioEndCallDto) {
-    if (!twilioEndCallDto.From) {
-      return;
-    }
-
     const restaurant = await this.restaurantsService.findByPhoneNumber(
-      twilioEndCallDto.From,
+      twilioEndCallDto.To,
     );
 
     if (!restaurant) {
@@ -64,7 +60,7 @@ export class RestaurantTwilioCallsService {
       callStatus: twilioEndCallDto.CallStatus,
       direction: twilioEndCallDto.Direction || '',
       duration: twilioEndCallDto.Duration,
-      from: twilioEndCallDto.From,
+      from: twilioEndCallDto.From || '',
       fromCountry: twilioEndCallDto.FromCountry || '',
       restaurantId: restaurant.id,
       timestamp: twilioEndCallDto.Timestamp || '',
