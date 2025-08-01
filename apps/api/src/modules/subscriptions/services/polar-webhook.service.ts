@@ -1,15 +1,22 @@
-import { BadRequestException, Injectable } from '@nestjs/common';
+import {
+  BadRequestException,
+  Injectable,
+  NotFoundException,
+} from '@nestjs/common';
 import { ConfigService } from '@nestjs/config';
 import { InjectRepository } from '@nestjs/typeorm';
+import { Customer } from '@polar-sh/sdk/models/components/customer.js';
 import { Subscription } from '@polar-sh/sdk/models/components/subscription';
 import {
   validateEvent,
   WebhookVerificationError,
 } from '@polar-sh/sdk/webhooks';
 import { IncomingHttpHeaders } from 'http';
-import { Repository } from 'typeorm';
+import { EntityNotFoundError, Repository } from 'typeorm';
 
-import { PolarSubscription } from '../entities/polar-subscription.entity';
+import { UsersService } from '@/modules/users/users.service';
+
+import { PolarCustomer, PolarSubscription } from '../entities';
 
 @Injectable()
 export class PolarWebhookService {
@@ -17,8 +24,11 @@ export class PolarWebhookService {
 
   constructor(
     private readonly configService: ConfigService,
+    @InjectRepository(PolarCustomer)
+    private readonly polarCustomerRepository: Repository<PolarCustomer>,
     @InjectRepository(PolarSubscription)
     private readonly polarSubscriptionRepository: Repository<PolarSubscription>,
+    private readonly usersService: UsersService,
   ) {
     this.webhookSecret = this.configService.getOrThrow<string>(
       'POLAR_WEBHOOK_SECRET',
@@ -42,47 +52,62 @@ export class PolarWebhookService {
   }
 
   async handleSubscriptionUpdated(subscription: Subscription) {
-    await this.polarSubscriptionRepository.update(subscription.id, {
-      status: subscription.status,
-      currentPeriodStart: subscription.currentPeriodStart,
-      currentPeriodEnd: subscription.currentPeriodEnd,
-    });
+    try {
+      await this.polarSubscriptionRepository.update(subscription.id, {
+        status: subscription.status,
+        currentPeriodStart: subscription.currentPeriodStart,
+        currentPeriodEnd: subscription.currentPeriodEnd,
+        canceledAt: subscription.canceledAt,
+        cancelAtPeriodEnd: subscription.cancelAtPeriodEnd,
+      });
+    } catch (error) {
+      if (error instanceof EntityNotFoundError) {
+        throw new NotFoundException(
+          'A Subscription has been updated in Polar, but it does not exist in the database',
+        );
+      }
+      throw error;
+    }
   }
 
-  async handleSubscriptionCanceled(subscription: Subscription) {
-    await this.polarSubscriptionRepository.update(subscription.id, {
-      status: subscription.status,
-      currentPeriodStart: subscription.currentPeriodStart,
-      currentPeriodEnd: subscription.currentPeriodEnd,
-      canceledAt: subscription.canceledAt,
-      cancelAtPeriodEnd: subscription.cancelAtPeriodEnd,
-    });
+  async handleCustomerCreated(customer: Customer) {
+    const userId = customer.externalId;
+    if (!userId) return;
+
+    const user = await this.usersService.findOne(userId);
+    if (!user) return;
+
+    await this.polarCustomerRepository.upsert(
+      { id: customer.id, user },
+      { conflictPaths: ['id'] },
+    );
   }
 
-  async handleSubscriptionActive(subscription: Subscription) {
-    await this.polarSubscriptionRepository.update(subscription.id, {
-      status: subscription.status,
-      currentPeriodStart: subscription.currentPeriodStart,
-      currentPeriodEnd: subscription.currentPeriodEnd,
-    });
+  async handleCustomerUpdated(customer: Customer) {
+    const userId = customer.externalId;
+    if (!userId) return;
+
+    const user = await this.usersService.findOne(userId);
+    if (!user) return;
+
+    await this.polarCustomerRepository.upsert(
+      { id: customer.id, user },
+      { conflictPaths: ['id'] },
+    );
   }
 
-  async handleSubscriptionRevoked(subscription: Subscription) {
-    await this.polarSubscriptionRepository.update(subscription.id, {
-      status: subscription.status,
-      currentPeriodStart: subscription.currentPeriodStart,
-      currentPeriodEnd: subscription.currentPeriodEnd,
-    });
-  }
+  async handleCustomerDeleted(customer: Customer) {
+    const userId = customer.externalId;
+    if (!userId) return;
 
-  async handleSubscriptionUncanceled(subscription: Subscription) {
-    await this.polarSubscriptionRepository.update(subscription.id, {
-      status: subscription.status,
-      currentPeriodStart: subscription.currentPeriodStart,
-      currentPeriodEnd: subscription.currentPeriodEnd,
-      canceledAt: null,
-      cancelAtPeriodEnd: false,
-    });
+    try {
+      await this.polarCustomerRepository.delete(customer.id);
+    } catch (error) {
+      if (error instanceof EntityNotFoundError) {
+        return;
+      }
+      throw error;
+    }
   }
 
   validateWebhookEvent(body: string | Buffer, headers: IncomingHttpHeaders) {

@@ -40,23 +40,20 @@ export class SubscriptionsController {
     const event = this.polarWebhookService.validateWebhookEvent(body, headers);
 
     switch (event.type) {
+      case 'customer.created':
+        await this.polarWebhookService.handleCustomerCreated(event.data);
+        break;
+      case 'customer.updated':
+        await this.polarWebhookService.handleCustomerUpdated(event.data);
+        break;
+      case 'customer.deleted':
+        await this.polarWebhookService.handleCustomerDeleted(event.data);
+        break;
       case 'subscription.created':
         await this.polarWebhookService.handleSubscriptionCreated(event.data);
         break;
       case 'subscription.updated':
         await this.polarWebhookService.handleSubscriptionUpdated(event.data);
-        break;
-      case 'subscription.canceled':
-        await this.polarWebhookService.handleSubscriptionCanceled(event.data);
-        break;
-      case 'subscription.active':
-        await this.polarWebhookService.handleSubscriptionActive(event.data);
-        break;
-      case 'subscription.revoked':
-        await this.polarWebhookService.handleSubscriptionRevoked(event.data);
-        break;
-      case 'subscription.uncanceled':
-        await this.polarWebhookService.handleSubscriptionUncanceled(event.data);
         break;
     }
 

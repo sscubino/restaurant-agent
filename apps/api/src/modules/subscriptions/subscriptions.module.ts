@@ -3,9 +3,12 @@ import { TypeOrmModule } from '@nestjs/typeorm';
 
 import { UsersModule } from '@/modules/users/users.module';
 
-import { PolarConfiguration } from './entities/polar-configuration.entity';
-import { PolarCustomer } from './entities/polar-customer.entity';
-import { PolarSubscription } from './entities/polar-subscription.entity';
+import {
+  PolarConfiguration,
+  PolarCustomer,
+  PolarSubscription,
+} from './entities';
+import { PolarConfigurationService } from './services/polar-configuration.service';
 import { PolarWebhookService } from './services/polar-webhook.service';
 import { SubscriptionsController } from './subscriptions.controller';
 import { SubscriptionsService } from './subscriptions.service';
@@ -19,7 +22,11 @@ import { SubscriptionsService } from './subscriptions.service';
     ]),
     UsersModule,
   ],
-  providers: [SubscriptionsService, PolarWebhookService],
+  providers: [
+    SubscriptionsService,
+    PolarWebhookService,
+    PolarConfigurationService,
+  ],
   exports: [SubscriptionsService],
   controllers: [SubscriptionsController],
 })

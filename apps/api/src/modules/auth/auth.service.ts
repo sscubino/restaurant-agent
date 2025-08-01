@@ -52,14 +52,11 @@ export class AuthService {
   }
 
   async login(loginDto: LoginDto): Promise<AuthResponse> {
-    const user = await this.validateUser(loginDto.email, loginDto.password);
-    if (!user) {
-      throw new UnauthorizedException('Invalid credentials');
-    }
+    return this.performLogin(loginDto);
+  }
 
-    await this.usersService.updateLastLogin(user.id);
-
-    return this.getAuthResponsePayload(user);
+  async adminLogin(loginDto: LoginDto): Promise<AuthResponse> {
+    return this.performLogin(loginDto, (user) => user.isSuperUser);
   }
 
   async registerWithInviteCode(
@@ -132,6 +129,21 @@ export class AuthService {
       access_token: this.jwtService.sign(payload),
       user,
     };
+  }
+
+  private async performLogin(
+    loginDto: LoginDto,
+    isValidUser?: (user: User) => boolean,
+  ): Promise<AuthResponse> {
+    const user = await this.validateUser(loginDto.email, loginDto.password);
+
+    if (!user || (isValidUser && !isValidUser(user))) {
+      throw new UnauthorizedException('Invalid credentials');
+    }
+
+    await this.usersService.updateLastLogin(user.id);
+
+    return this.getAuthResponsePayload(user);
   }
 
   private async validateInviteCode(inviteCode: string) {

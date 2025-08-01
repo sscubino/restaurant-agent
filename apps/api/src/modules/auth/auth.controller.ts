@@ -49,6 +49,19 @@ export class AuthController {
     return this.authService.login(loginDto);
   }
 
+  @Post('admin-login')
+  @HttpCode(HttpStatus.OK)
+  @ApiOperation({ summary: 'Admin login' })
+  @ApiBody({ type: LoginDto })
+  @ApiResponse({
+    status: 200,
+    description: 'Admin login successful. Returns access token.',
+  })
+  @ApiResponse({ status: 401, description: 'Invalid credentials.' })
+  adminLogin(@Body() loginDto: LoginDto) {
+    return this.authService.adminLogin(loginDto);
+  }
+
   @Post('register')
   @ApiOperation({ summary: 'User registration' })
   @ApiBody({ type: RegisterWithInviteCodeDto })

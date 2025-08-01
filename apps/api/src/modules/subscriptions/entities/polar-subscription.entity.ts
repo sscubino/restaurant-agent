@@ -16,7 +16,7 @@ export class PolarSubscription {
   @PrimaryColumn()
   id: string;
 
-  @Column({ name: 'status' })
+  @Column()
   status: SubscriptionStatus;
 
   @Column({ name: 'current_period_start' })
